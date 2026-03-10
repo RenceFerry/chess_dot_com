@@ -2,10 +2,14 @@ import Image from "next/image";
 import { FaChessPawn } from "react-icons/fa";
 import demo from "@/assets/demo.png";
 import Link from "next/link";
+import bgChessBoard from '@/assets/chessboard-background.346891ba.png';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center bg-back font-sans">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-back font-sans relative">
+
+      {/** bg image */}
+      <Image loading="eager" src={bgChessBoard} className='absolute w-full bottom-0' alt="bgchessboard" />
 
       {/** top section */}
       <div className="w-full flex flex-row justify-between items-center px-4 py-2 bg-back">
@@ -19,11 +23,11 @@ export default function Home() {
       </div>
 
       {/** main section */}
-      <div className="flex-1 flex w-full flex-col md:flex-row justify-center items-center p-4">
+      <div className="flex-1 flex w-full flex-col md:flex-row justify-center items-center p-4 z-10">
 
         {/** demo image */}
         <div className="w-full flex-1 md:h-full md:flex-1 flex items-center justify-center">
-          <Image src={demo} alt="Chess Demo" width={600} height={400} className="w-[60%] md:w-[80%] h-auto rounded-lg shadow-lg" />
+          <Image loading="eager" src={demo} alt="Chess Demo" width={600} height={400} className="w-[60%] md:w-[80%] h-auto rounded-lg shadow-lg" />
         </div>
 
         {/** get started */}
@@ -33,7 +37,7 @@ export default function Home() {
 
           <Link 
             title="play"
-            href="/play"
+            href="/:user?tab-home"
             className="w-full max-w-xs bg-brown2 hover:bg-brown3 text-fore font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 md:text-xl text-center cursor-pointer"
           >
             Get Started

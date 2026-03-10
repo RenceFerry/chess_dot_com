@@ -2,28 +2,79 @@
 
 :root {
   --back: #302e2b;
+  --back1: #262421;
+  --back2: #201e1c;
+  --back3: #181614;
+  --back4: #141211;
   --fore: #ededed;
+  --fore1: #c5c5c5;
+  --fore2: #979797;
   --brown1: #c9b99a;
   --brown2: #a67c52;
   --brown3: #8b5e3c;
   --brown4: #6f4526;
   --brown5: #53300f;
+  --error1: #ff7272;
+  --error2: #ff5151;
+  --green1: #92ee92;
+  --green2: #58da58;
+  --green3: #29b129;
 }
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-back: var(--back);
+  --color-back1: var(--back1);
+  --color-back2: var(--back2);
+  --color-back3: var(--back3);
+  --color-back4: var(--back4);
   --color-fore: var(--fore);
+  --color-fore1: var(--fore1);
+  --color-fore2: var(--fore2);
   --color-brown1: var(--brown1);
   --color-brown2: var(--brown2);
   --color-brown3: var(--brown3);
   --color-brown4: var(--brown4);
   --color-brown5: var(--brown5);
+  --color-error1: var(--error1);
+  --color-error2: var(--error2);
+  --color-green1: var(--green1);
+  --color-green3: var(--green3);
+  --color-green2: var(--green2);
 }
 
 body {
   background: var(--back);
   color: var(--fore);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+tbody tr:hover td {
+  background-color: var(--color-back2); /* or whatever your back2 value is */
+}
+
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--back) transparent; /* thumb track */
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 6px;  /* without this, webkit scrollbar is invisible */
+  height: 6px; /* for horizontal scroll */
+}
+
+.scrollbar::-webkit-scrollbar-button {
+  display: hidden;
+  width: 0;
+  height: 0;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--back);
+  border-radius: 999px;
 }

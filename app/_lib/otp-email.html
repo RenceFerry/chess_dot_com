@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your OTP Code</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #242321;
+      font-family: 'Sora', sans-serif;
+      color: #e8e8f0;
+      padding: 40px 16px;
+    }
+
+    .wrapper {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1b1a19;
+      border: 1px solid #11100f;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    /* Top accent bar */
+    .accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #a67c52, #8b5e3c, #6f4526);
+    }
+
+    .body {
+      padding: 48px 40px;
+    }
+
+    .logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      color: #a67c52;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #f0f0ff;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      font-weight: 300;
+      color: #807d6b;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    /* OTP Box */
+    .otp-wrapper {
+      background: #0c0c0f;
+      border: 1px solid #3d352a;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .otp-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: #605b4a;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .otp-code {
+      font-family: 'DM Mono', monospace;
+      font-size: 42px;
+      font-weight: 500;
+      letter-spacing: 0.25em;
+      color: #f0f0ff;
+      /* spaced digits effect */
+      background: linear-gradient(135deg, #fad78b, #fac460);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .otp-expiry {
+      font-size: 12px;
+      color: #a67c52;
+      margin-top: 16px;
+      font-weight: 300;
+    }
+
+    .otp-expiry span {
+      color: #a67c52;
+      font-weight: 400;
+    }
+
+    .divider {
+      height: 1px;
+      background: #1e1e2e;
+      margin: 32px 0;
+    }
+
+    .warning {
+      background: rgba(255, 232, 99, 0.06);
+      border: 1px solid rgba(255, 232, 99, 0.15);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #807d6b;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .warning strong {
+      color: #fad38b;
+      font-weight: 600;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: #6b6a4d;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .footer-text a {
+      color: #ffc163;
+      text-decoration: none;
+    }
+
+    /* Bottom footer */
+    .footer {
+      padding: 20px 40px;
+      border-top: 1px solid #1a1a28;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: #42402e;
+      letter-spacing: 0.1em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      font-size: 11px;
+      color: #2e2e42;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: #ffe263;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <div class="accent-bar"></div>
+
+      <div class="body">
+        <div class="logo">● {{YourApp}}</div>
+
+        <h1>Verify your identity</h1>
+        <p class="subtitle">
+          Use the code below to complete your sign-up.<br/>
+          This code is time-limited.
+        </p>
+
+        <div class="otp-wrapper">
+          <div class="otp-label">Passcode</div>
+          <div class="otp-code">{{OTP}}</div>
+          <div class="otp-expiry">Expires in <span>{{Expire}} minutes</span></div>
+        </div>
+
+        <div class="warning">
+          <strong>Didn't request this?</strong> If you didn't try to sign in, you can safely ignore this email. Someone may have entered your email by mistake.
+        </div>
+
+        <div class="divider"></div>
+
+        <p class="footer-text">
+          This is an automated message from <a href="#">{{YourApp}}</a>. Please do not reply to this email.
+        </p>
+      </div>
+
+      <div class="footer">
+        <div class="footer-brand">{{YourApp}} © 2026</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
