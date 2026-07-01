@@ -1,8 +1,10 @@
+'use client';
+
 import Image from "next/image";
+import bgChessBoard from '@/assets/chessboard-background.346891ba.png';
 import { FaChessPawn } from "react-icons/fa";
 import demo from "@/assets/demo.png";
 import Link from "next/link";
-import bgChessBoard from '@/assets/chessboard-background.346891ba.png';
 
 export default function Home() {
   return (
@@ -19,7 +21,6 @@ export default function Home() {
           <FaChessPawn className="text-3xl md:text-4xl text-brown2" />
           <h1 className="-ml-2 text-xl md:text-2xl font-bold text-fore">Chess<span className="text-xs md:text-sm">DotCom</span></h1>
         </div>
-
       </div>
 
       {/** main section */}
@@ -37,7 +38,7 @@ export default function Home() {
 
           <Link 
             title="play"
-            href="/:user?tab-home"
+            href="/:user?tab=home"
             className="w-full max-w-xs bg-brown2 hover:bg-brown3 text-fore font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 md:text-xl text-center cursor-pointer"
           >
             Get Started

@@ -2,6 +2,8 @@ import prisma from "@/_lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { encrypt } from "@/_utils/sessions";
 
+const isProduction = process.env.PRODUCTION === 'true';
+
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
 
@@ -45,6 +47,8 @@ export async function GET(req: NextRequest) {
 
   const { email, picture, name } = await userInfo.json();
 
+  const image = picture.replace('=s96-c', '=s400-c');
+
   let dbUser;
   try {
     dbUser = await prisma.users.upsert({   
@@ -55,7 +59,7 @@ export async function GET(req: NextRequest) {
       create: {
         email,
         name,
-        image: picture
+        image
       },
       select: {
         id: true,
@@ -67,16 +71,24 @@ export async function GET(req: NextRequest) {
   }
 
   const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 );
-  const payload = await encrypt({ userId: dbUser.id, expireAt, name: dbUser.name });
+  const payload = await encrypt({ userId: dbUser.id, expireAt, name: dbUser.name.replaceAll(' ', '').toLowerCase() });
 
-  const response = NextResponse.redirect(new URL('/play', req.nextUrl));
+  const response = NextResponse.redirect(new URL('/:user?tab=home', req.nextUrl));
 
   response.cookies.set('session', payload,  {
     expires: expireAt,
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
-    secure: true
+    secure: isProduction
+  })
+
+  response.cookies.set('userId', dbUser.id, {
+    expires: expireAt,
+    httpOnly: false,
+    sameSite: 'lax',
+    path: '/',
+    secure: isProduction
   })
 
   return response;

@@ -14,8 +14,9 @@ import Link from 'next/link';
 import { loginSA } from '@/_utils/serverActions/auth/serverActions';
 import type { StateAuthForm } from '@/_lib/types';
 import clsx from 'clsx';
-import { useNotif } from '@/_utils/context/notifContext';
+import { useNotif } from '@/_lib/context/notifContext';
 import { redirect } from 'next/navigation';
+import Button from '@/_components/wrappers/button';
 
 const initialState: StateAuthForm = null;
 
@@ -50,7 +51,7 @@ const Page = () => {
         <h1 className='font-bold text-brown1 text-xl md:text-2xl my-4'>Login to your account.</h1>
 
         {/** form */}
-        <form action={formAction } className='flex flex-col gap-3 jutify-between items-center w-full pt-10 px-10 bg-back1 rounded-tl-md rounded-tr-md'>
+        <form action={formAction } className='flex flex-col gap-3 jutify-between items-center w-full pt-10 px-10 bg-back1 rounded-tl-md rounded-tr-md text-fore'>
 
           {/** name, email */}
           <div className='relative w-full h-10'>
@@ -96,9 +97,16 @@ const Page = () => {
           }
 
           {/** login button */}
-          <button disabled={pending} type='submit' title='log in' className="rounded-md bg-brown2 my-5 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform hover:scale-105 hover:bg-brown3 cursor-pointer">
-            Log In
-          </button>
+          <Button bgspan='fore/20' disabled={pending} type='submit' title='log in' className={clsx('rounded-md bg-brown2 my-5 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform flex items-center justify-center', {
+            'hover:scale-105 hover:bg-brown3 cursor-pointer': !pending,
+            'cursor-not-allowed brightness-75': pending
+          })}>
+            {
+              pending ?
+              <div className='h-6 w-6 border-t-2 border-r-2 border-fore rounded-full animate-spin self-center' /> :
+              <h1>Log In</h1> 
+            }
+          </Button>
 
           {/** error message */
             state?.message &&
@@ -115,10 +123,13 @@ const Page = () => {
 
         {/** login with google */}
         <form className='w-full px-10 bg-back1' action='/api/auth/login/google' method='GET'>
-          <button type='submit' title='continue with goolge' className="rounded-md bg-brown5 my-5 w-full h-12 font-semibold text-lg flex flex-row justify-center items-center gap-3 transition duration-300 ease-in-out transform hover:scale-105 hover:bg-brown4 cursor-pointer">
+          <Button bgspan='fore/20' disabled={pending} type='submit' title='continue with goolge' className={clsx('rounded-md bg-brown5 my-5 w-full h-12 font-semibold text-lg flex flex-row justify-center items-center gap-3 transition duration-300 ease-in-out transform', {
+            'hover:scale-105 hover:bg-brown4 cursor-pointer': !pending,
+            'cursor-not-allowed brightness-75': pending
+          })}>
             <FcGoogle className='text-2xl'/>
             Continue with Google
-          </button>
+          </Button>
         </form>
 
         <div className="h-12 w-full bg-back2 rounded-bl-md rounded-br-md grid items-center justify-center">

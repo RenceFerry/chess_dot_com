@@ -15,9 +15,10 @@ import Link from 'next/link';
 import type { StateAuthForm } from '@/_lib/types';
 import { signupSA } from '@/_utils/serverActions/auth/serverActions';
 import clsx from 'clsx';
-import { useNotif } from '@/_utils/context/notifContext';
+import { useNotif } from '@/_lib/context/notifContext';
 import { redirect } from 'next/navigation';
 import Logo from '@/_components/logo';
+import Button from '@/_components/wrappers/button';
 
 const initialState: StateAuthForm = null;
 
@@ -115,9 +116,21 @@ const Page = () => {
           }
 
           {/** sign up button */}
-          <button disabled={pending} type='submit' title='log in' className="rounded-md bg-brown2 my-5 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform hover:scale-105 hover:bg-brown3">
-            Create Account
-          </button>
+          <Button bgspan='fore/20' disabled={pending} type='submit' title='log in' className={clsx('rounded-md bg-brown2 my-5 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform flex items-center justify-center', {
+            'hover:scale-105 hover:bg-brown3 cursor-pointer': !pending,
+            'cursor-not-allowed brightness-75': pending
+          })}>
+            {
+              pending ?
+              <div className='h-6 w-6 border-t-2 border-r-2 border-fore rounded-full animate-spin self-center' /> :
+              <h1>Create Account</h1> 
+            }
+          </Button>
+
+          {/** error message */
+            state?.message &&
+            <p className='text-error1 text-sm self-center inline mb-2'>{state?.message}</p>
+          }
 
           {/** or */}
           <div className="flex flex-row justify-center items-center gap-2 w-full">
@@ -129,10 +142,13 @@ const Page = () => {
 
         {/** login with google */}
         <form className='w-full px-10 bg-back1' action='/api/auth/login/google' method='GET'>
-          <button type='submit' title='continue with goolge' className="rounded-md bg-brown5 my-5 w-full h-12 font-semibold text-lg flex flex-row justify-center items-center gap-3 transition duration-300 ease-in-out transform hover:scale-105 hover:bg-brown4 cursor-pointer">
+          <Button bgspan='fore/20' type='submit' disabled={pending} title='continue with goolge' className={clsx('rounded-md bg-brown5 my-5 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform flex items-center justify-center gap-2', {
+            'hover:scale-105 hover:bg-brown4 cursor-pointer': !pending,
+            'cursor-not-allowed brightness-75': pending
+          })}>
             <FcGoogle className='text-2xl'/>
             Continue with Google
-          </button>
+          </Button>
         </form>
 
         <div className="h-12 w-full bg-back2 rounded-bl-md rounded-br-md grid items-center justify-center">

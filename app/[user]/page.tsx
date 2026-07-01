@@ -1,13 +1,12 @@
 'use client'
 
-import TopSection from "@/_components/[user]/topSection";
-import Navbar from "@/_components/[user]/navbar";
+import Navbar from "@/_components/[user]/sections/navbar";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
-import More from "@/_components/[user]/more/more";
-import Home from '@/_components/[user]/home/home';
-import Play from '@/_components/[user]/play/play';
-import Streams from '@/_components/[user]/streams/streams';
+import More from "@/_components/[user]/sections/more/more";
+import Home from '@/_components/[user]/sections/home/home';
+import Play from '@/_components/[user]/sections/play/play';
+import Streams from '@/_components/[user]/sections/streams/streams';
 
 const Page = () => {
   const { replace } = useRouter();
@@ -26,13 +25,10 @@ const Page = () => {
   }
 
   return (
-    <div className="w-screen h-screen flex flex-col justify-between items-center">
-
-      {/** topsection */}
-      <TopSection />
+    <div className="h-full w-full min-w-0 min-h-0 flex flex-col justify-between items-center">
 
       {/** nav and pages */}
-      <div className="flex flex-col lg:flex-row flex-1 w-full min-h-0">
+      <div className="flex flex-col lg:flex-row flex-1 w-full min-w-0 min-h-0">
 
         {/** navigation bar */}
         <Navbar activeTab={currentTab || 'home'} change={changeTab}/>

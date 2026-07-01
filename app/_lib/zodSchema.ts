@@ -7,7 +7,7 @@ export const loginSchema = z.object({
       return z.email().safeParse(val.trim()).success;
     }
 
-    return val.length >= 3;
+    return val.length >= 3 && val.length <= 30;
   }, {
     error: "Invalid email or Username (3+ characters)"
   }),
@@ -17,6 +17,6 @@ export const loginSchema = z.object({
 export const signupSchema = loginSchema.pick({
   password: true
 }).extend({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters").max(30, 'Username must be at most 30 characters'),
   email: z.string().trim().pipe(z.email("Invalid Email")),
 });

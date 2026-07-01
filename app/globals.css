@@ -16,6 +16,7 @@
   --brown5: #53300f;
   --error1: #ff7272;
   --error2: #ff5151;
+  --error3: #e73636;
   --green1: #92ee92;
   --green2: #58da58;
   --green3: #29b129;
@@ -39,6 +40,7 @@
   --color-brown5: var(--brown5);
   --color-error1: var(--error1);
   --color-error2: var(--error2);
+  --color-error3: var(--error3);
   --color-green1: var(--green1);
   --color-green3: var(--green3);
   --color-green2: var(--green2);
@@ -77,4 +79,39 @@ tbody tr:hover td {
 .scrollbar::-webkit-scrollbar-thumb {
   background-color: var(--back);
   border-radius: 999px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-text-cursor {
+  cursor: default;
+}
+
+.no-text-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#button-feedback {
+  @apply relative min-h-0 min-w-0 cursor-pointer;
+}
+
+.feedback-span {
+  border-radius: inherit;
+  animation: scaleFeedback 0.15s ease-in-out;
+}
+
+@keyframes scaleFeedback {
+  from {
+    opacity: 100%;
+  }
+  to {
+    opacity: 0;
+  }
 }

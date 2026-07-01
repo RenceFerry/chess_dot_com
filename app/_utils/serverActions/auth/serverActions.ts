@@ -2,18 +2,18 @@
 
 import z from 'zod';
 import { loginSchema, signupSchema } from "@/_lib/zodSchema";
-import type { RedisOtpPayload, StateAuthForm } from '../../../_lib/types';
+import type { StateAuthForm } from '../../../_lib/types';
 import bcrypt from 'bcrypt';
 import prisma from '@/_lib/prisma';
 import { createSession } from '../../sessions';
 import transporter from '@/_lib/brevo';
-import getRedis from '@/_lib/redis';
 import { generateOTP } from '@/_utils/helpers';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import gender from '@/_lib/genderApi';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const otpHTMLTemplateFilepath = path.join(__dirname, '../../../_lib/otp-email.html')
@@ -48,7 +48,8 @@ export const loginSA = async (initialState: StateAuthForm, formData: FormData): 
       user = await prisma.users.findUnique({
         where: {
           email: nameOrEmail
-        }
+        },
+        
       })
     } catch (e) {
       return { message: 'Server Error, try again later', payload: { ...data } };
@@ -72,11 +73,18 @@ export const loginSA = async (initialState: StateAuthForm, formData: FormData): 
     }
   }
 
+  const { id, password: userPassword, name } = user;
+  //check if user sign up using google
+  if (!userPassword) {
+    return {
+      message: 'You signed up using google, use it to log in and set a password after logging in', payload: { ...data }
+    }
+  }
+
   console.log('check')
 
   //validate password
-  const { id, password: UserPassword, name } = user;
-  const valid = await bcrypt.compare(formPassword, UserPassword as string);
+  const valid = await bcrypt.compare(formPassword, userPassword as string);
   if (!valid) {
     return {
       message: 'Incorrect password', 
@@ -90,7 +98,7 @@ export const loginSA = async (initialState: StateAuthForm, formData: FormData): 
   return {
     code: 0,
     message: 'Login successful',
-    redirect: `/${name}/play`,
+    redirect: `/${name.replace(' ', '')}`,
   }
 }
 
@@ -127,6 +135,7 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
         ]
       }
     })
+
     console.log('user?', user)
 
     if (user) {
@@ -169,7 +178,7 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
     }
   } catch (e) {
     return {
-      message: 'Server error, try again later',
+      message: 'Server error, cannot reach database, try again later',
       code: 1,
       payload: {
         ...data
@@ -179,40 +188,52 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
 
   // hash password
   const password = await bcrypt.hash(formPassword, 10);
-
-  console.log('b redis')
-
   const otp = generateOTP(6);
+
+  const info = JSON.stringify({
+    name,
+    password,
+    otp,
+  })
+
   try {
     // send otp to email
     const html = otpHTMLTemplate
       .replace('{{OTP}}', otp.toString())
-      .replace('{{YourApp}}', 'ChessDotCom')
+      .replaceAll('{{YourApp}}', 'ChessDotCom')
       .replace('{{Expire}}', '5');
 
     await transporter.sendMail({
-      from: 'ChessDotCom <no-reply@ChessDotCom.com',
+      from: '"ChessDotCom" <rence.ferry.dev@gmail.com>',
       to: email,
       subject: 'Verify your email with OTP',
       html: html
     })
 
-    // store otp in redis
-    await (await getRedis()).json.set(email, '$', {
-      otp,
-      password,
-      name
-    });
+    // store otp
+    await prisma.shortInfo.upsert({
+      where: {
+        email: email
+      },
+      update: {
+        info,
+        ex: new Date(Date.now() + 1000 * 60 * 5)
+      },
+      create: {
+        email,
+        info,
+        ex: new Date(Date.now() + 1000 * 60 * 5)
+      }
+    })
+
   } catch (e) {
     console.error(e);
     return {
       message: 'server error, try again later',
-      code: 1
+      code: 1,
+      payload: { ...data }
     }
   }
-
-
-  console.log('a redis');
 
   (await cookies()).set({
     name: "email",
@@ -232,19 +253,27 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
   const email = cookie.get('email')?.value;
   const otp = formData.get('otp')?.toString();
 
+  // check if otp is valid
   if (!otp || otp.length !== 6) return {
     message: 'Invalid OTP',
     code: 1,
   }
 
+  // check if email is in cookie
   if (!email) return {
     message: "No email provided, please try <h1 className='text-blue-200'>signing up</h1>",
     code: 1
   }
-
-  let res: RedisOtpPayload;
+  
+  // get otp from db
+  let res;
   try {
-    res = await (await getRedis()).json.get(email, { path: '$' }) as RedisOtpPayload;
+    res = await prisma.shortInfo.findUnique({
+      where: {
+        email
+      }
+    });
+
   } catch(e) {
     console.error(e);
     return {
@@ -256,12 +285,20 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
   if (!res)
   {
     return {
-      message: 'OTP expired, please sign up again',
+      message: 'OTP does not exist, please sign up again or request new OTP',
       code: 1
     }
   }
 
-  const {name, password, otp: resOtp} = res;
+  if (res.ex < new Date()) {
+    return {
+      message: 'OTP expired, please sign up again or request a new OTP',
+      code: 1
+    }
+  }
+
+  const {name, password, otp: resOtp } = res.info ? JSON.parse(res.info) : {name: '', password: '', otp: 0};
+  console.log(otp);
 
   if (resOtp !== parseInt(otp)) {
     return {
@@ -270,14 +307,33 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
     }
   }
 
-  //create user
+  try {
+    await prisma.shortInfo.delete({
+      where: {
+        email
+      }
+    })
+  } catch (e) {
+    console.error(e);
+    return {
+      message: 'Server error, try again later',
+      code: 1
+    }
+  }
+
+  // generate avatar and create user
+  const sex = (await gender.getByFullName(name)).gender || 'unknown';
+  const image = `https://api.dicebear.com/9.x/avataaars/svg?seed=${resOtp}&sex=${sex}`;
+  console.log(sex, image);
+
   let user;
   try {
     user = await prisma.users.create({
       data: {
         email,
         name,
-        password
+        password,
+        image
       }
     })
   } catch (e) {
@@ -287,13 +343,12 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
     }
   }
 
-  await (await getRedis()).json.del(email);
 
   await createSession(user.id, user.name);
 
   return {
     code: 0,
     message: 'Account created',
-    redirect: `/${user.name}/play`,
+    redirect: `/${user.name.replaceAll(' ', '')}`,
   };
 }

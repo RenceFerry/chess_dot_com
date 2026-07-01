@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useActionState, useState, useRef, RefObject } from "react";
+import { useEffect, useActionState, useState, useRef } from "react";
 import { verifyEmailSA } from '@/_utils/serverActions/auth/serverActions';
 import Image from 'next/image';
 import bgChessBoard from '@/assets/chessboard-background.346891ba.png';
@@ -9,6 +9,9 @@ import Logo from "@/_components/logo";
 import { StateAuthForm } from "@/_lib/types";
 import clsx from "clsx";
 import Link from "next/link";
+import { useNotif } from "@/_lib/context/notifContext";
+import { redirect } from 'next/navigation';
+import Button from '@/_components/wrappers/button';
 
 const initialState: StateAuthForm = null;
 
@@ -17,29 +20,48 @@ const Page = () => {
   const router = useRouter();
   const ex = searchParams.get('ex');
   const [ state, formAction, pending ] = useActionState(verifyEmailSA, initialState);
-  const [ timer, setTimer ] = useState<number>(0);
+  const [ timer, setTimer ] = useState<number>(5 * 60 * 1000);
   const timerRef = useRef<number | null>(null);
+  const notif = useNotif();
   
   useEffect(() => {
     if (!ex) router.push('/signup');
   }, [ex, router])
 
   useEffect(() => {
-    if (!timerRef.current) {
-      timerRef.current = ex ? parseInt(ex) - Date.now() < 0 ? 0 : parseInt(ex) - Date.now() / 1000 : 0;
+    console.log(timerRef.current, timer, parseInt(ex || '0') - Date.now())
+
+    if (timerRef.current === null) {
+      timerRef.current = ex ? parseInt(ex) - Date.now() < 0 ? 0 : parseInt(ex) - Date.now() : 0;
       setTimer(timerRef.current);
     }
 
-    if (timer < 0) return;
+    if (timer <= 0) {
+      setTimer(0);
+      router.push('/signup');
+      return;
+    }
 
+    console.log(timer);
     const interval = setInterval(() => {
-      setTimer(prev => prev--);
+      setTimer(prev => prev -= 1000);
     }, 1000);
 
     return () => {
       clearInterval(interval);
     }
-  }, [timer, ex])
+  }, [timer, ex, router])
+
+  useEffect(() => {
+    if (state?.code === 0) {
+      notif?.setNotif({
+        message: state.message || '',
+        color: 'green1',
+      })
+
+      redirect(state?.redirect || '/');
+    }
+  }, [state, notif]);
 
   return (
     <div className='relative h-full w-full flex justify-center items-center'>
@@ -60,26 +82,35 @@ const Page = () => {
 
           {/** name, email */}
           <div className='relative w-full h-10'>
-            <input title='otp' type="text" placeholder='Type the OTP we send to your email' name='otp' className={clsx('peer w-full h-full rounded-md outline-none border bg-back px-3 border-fore2 hover:border-fore focus:border-fore', {
+            <input title='otp' type="number" placeholder='Type the OTP we send to your email' name='otp' className={clsx('peer w-full h-full rounded-md outline-none border bg-back px-3 border-fore2 hover:border-fore focus:border-fore [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none', {
               'border-error1': state?.code !== 0,
             })}/>
           </div>
 
           {/** name error message */
-            state?.message &&
+            (state?.message && state?.code !== 0) &&
             <p className='text-error1 text-sm self-start inline'>{state?.message}</p>
           }
           
           {/** verify  button */}
-          <button disabled={pending} type='submit' title='log in' className="rounded-md bg-brown2 mt-2 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform hover:scale-105 hover:bg-brown3 cursor-pointer">
-            Verify
-          </button>
+          <Button bgspan='fore/20' disabled={pending} type='submit' title='log in' className={clsx('rounded-md bg-brown2 my-5 w-full h-12 font-bold text-lg transition duration-300 ease-in-out transform flex items-center justify-center', {
+            'hover:scale-105 hover:bg-brown3 cursor-pointer': !pending,
+            'cursor-not-allowed brightness-75': pending
+          })}>
+            {
+              pending ?
+              <div className='h-6 w-6 border-t-2 border-r-2 border-fore rounded-full animate-spin self-center' /> :
+              <h1>Verify</h1> 
+            }
+          </Button>
 
           {/** timer */}
           <p className="text-center text-md text-fore1 mb-2">
-            { Math.floor(timer / 60) > 0 ?
-              (`${Math.floor(timer/60)}:${timer % 60 < 10 ? '0' + timer % 60 : timer % 60}`) :
-              (timer % 60)
+            { timer ?
+              (Math.floor(timer / 60000) > 0 ?
+              (`${Math.floor(timer/60000)}:${timer % 60000 / 1000 < 10 ? '0' + Math.floor(timer % 60000 / 1000) : Math.floor(timer % 60000 / 1000)}`) :
+              (Math.floor(timer % 60000 / 1000))) :
+              '5:00'
             }
           </p>
 

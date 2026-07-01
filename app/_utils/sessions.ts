@@ -5,6 +5,7 @@ import type { SessionPayload } from "@/_lib/types";
 import { cookies } from "next/headers";
 import { cache } from 'react';
 
+const isProduction = process.env.PRODUCTION === 'true';
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
@@ -30,12 +31,21 @@ export async function decrypt(session: string | undefined = '') {
 
 export async function createSession(userId: string, name: string) {
   const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const session = await  encrypt({ userId, expireAt, name });
+  name = name.replace(' ', '').toLowerCase();
+  const session = await encrypt({ userId, expireAt, name });
   const cookie = await cookies();
 
   cookie.set('session', session, {
     httpOnly: true,
-    secure: true,
+    secure: isProduction,
+    expires: expireAt,
+    sameSite: 'lax',
+    path: '/'
+  })
+  
+  cookie.set('userId', userId, {
+    httpOnly: false,
+    secure: isProduction,
     expires: expireAt,
     sameSite: 'lax',
     path: '/'
