@@ -11,17 +11,15 @@ const privateRoutes = new RegExp(
   '^' +
   '(?<user>\\/[^/?]+)' +                                // /user
   '(' +
-    '\\/' + '(?<path1>play|stream)' +                   // /play or /stream
+    '\\/' + '(?<path1>play)' +                   // /play or /stream
     '\\?' +                                             // ?
-    '(?=.*id=(?<uuid>' + uuid + '))' +      // lookahead: id=uui(order-independent)
-    '(?=.*stream=(?<stream>\\d+))?' +        // lookahead: stream=1 (optional)
+    '(?=.*id=(?<uuid>' + uuid + '))' +      // lookahead: id=uui(order-independent)  
     '[^#]*' +                                           // consume query string
   '|' +
-    '\\/' + '((?<path2>followers|settings)' +            // /followers or /settings
-    '(\\?id=(' + uuid + '))?)' +
+    '\\/' + '(?<path2>followers|settings|stream)[^#]*'  +            // /followers or /settings or /stream with query strings
   '|' +
     '(?<usertab>\\?tab=(?:play|home|more|streams))' +   // ?tab=...
-  ')' +                          // whole suffix is optional (matches bare /user)
+  ')?' +                          // whole suffix is optional (matches bare /user)
   '$',
   'i'
 );

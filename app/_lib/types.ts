@@ -1,5 +1,6 @@
 import { SetStateAction } from "react";
 import type { IconType } from "react-icons";
+import type { Socket } from "socket.io";
 
 export type StateAuthForm = {
   message?: string;
@@ -65,11 +66,14 @@ export type CookiesType = {
 }
 
 export type StreamCardsInfoType = {
-  p1: string;
-  p1Time: string;
-  p2: string;
-  p2Time: string;
-  mode: 'Blitz' | 'Rapid' | 'Classic';
+  no: number;
+  p1Name: string;
+  p2Name: string;
+  p2Elo: number;
+  p1Elo: number;
+  p1Img: string | null;
+  p2Img: string | null;
+  mode: Mode;
 }
 
 export type ChessPiecesType = {
@@ -125,13 +129,30 @@ export type UserStatType =  {
   lose: number;
 }
 
+export type PlayerStatType = UserStatType & {
+  online: boolean;
+  playing: boolean;
+  streaming: boolean;
+  followed: boolean;
+}
+
 export type PlayersType = {
   name: string;
   id: string;
-  email: string;
   image: string | null;
   elo: number;
-  status: 'online' | 'offline';
-  playing: 'not playing' | 'playing';
-  stream: 'not streaming' | 'streaming';
+  online: boolean;
+  playing: boolean;
+  streaming: boolean;
+}
+
+export type PlayersMapObjectType = {
+  userId: string;
+  name: string;
+  online: boolean;
+  socket: Map<string, {
+    playing: boolean;
+    streaming: boolean;
+    socket: Socket;
+  }>;
 }

@@ -2,7 +2,7 @@
 
 import prisma from "@/_lib/prisma";
 import { authenticate} from "./authenticate";
-import type { UserInfo, UserStatType, GameHistoryType, PlayersType } from "../../_lib/types";
+import type { PlayerStatType, UserInfo, UserStatType, GameHistoryType, PlayersType, PlayersMapObjectType, StreamCardsInfoType } from "../../_lib/types";
 
 // fetch game history of a user
 export const fetchGameHistory = async (): Promise<{ data: GameHistoryType[]; error: string | null}> => {
@@ -85,14 +85,14 @@ export const getUserDet = async (): Promise<{ data: UserInfo | null; error: stri
 }
 
 // fetch user stat
-export const getUserStat = async (id?: string): Promise<{data: UserStatType | null, error: string | null}> => {
+export const getUserStat = async (): Promise<{data: UserStatType | null, error: string | null}> => {
 
   // authenticate
   const decrypted = await authenticate();
   if (!decrypted) return { data: null, error: 'unauthorized' };
 
   // default to userID if id is not provided
-  const playersId = id ? id : decrypted.userId;
+  const playersId = decrypted.userId;
 
   try {
 
@@ -147,52 +147,287 @@ export const getUserStat = async (id?: string): Promise<{data: UserStatType | nu
 }
 
 // fetch players
-export const getPlayers = async (search: string, skip: number): Promise<{ data: null | PlayersType[], error: string |  null }> => {
+export const getPlayers = async (search: string, followCursor: string, nonFollowCursor: string, plnum: number = 25): Promise<{ data: null | {
+  follow: PlayersType[],
+  nonFollow: PlayersType[]
+}, error: string |  null, cursors: { follow: string; nonFollow: string } }> => {
 
   // authenticate
   const decrypted = await authenticate();
-  if (!decrypted) return { data: null, error: 'unauthorized' };
+  if (!decrypted) return { data: null, error: 'unauthorized', cursors: { follow: '', nonFollow: '' } };
+  const num = plnum === 0 ? 25 : plnum;
 
   try {
+    let nfcursor = '', additionalPlayers; 
+
+    console.log('fetching', search)
+
     const players = await prisma.users.findMany({
       where: {
         NOT: { id: decrypted.userId },
         name: {
-          contains: search
+          contains: search,
+          mode: 'insensitive'
         },
-        OR: [
-          {
-            following: {
-              some: {
-                playerId: decrypted.userId
-              }
-            }
-          },
-          {
-            followers: {
-              some: {
-                playerId: decrypted.userId
-              } 
-            }
+        followers: {
+          some: {
+            followerId: decrypted.userId
           }
-        ]
+        }
       },
-      skip,
-      take: 25,
+      ...(
+        followCursor && followCursor.length !== 0 ?
+        { skip: 1, cursor: { name: followCursor } } :
+        {}
+      ),
+      orderBy: {
+        name: 'asc'
+      },
+      take: num,
       select: {
         id: true,
         name: true,
-        email: true,
         image: true,
         elo: true
       }
     });
 
+    const fCursor = players.length > 0 ? players[players.length - 1].name : followCursor;
+
+    if (players.length < num) {
+      additionalPlayers = await prisma.users.findMany({
+        where: {
+          NOT: [
+            { id: decrypted.userId },
+            {
+              followers: {
+                some: {
+                  followerId: decrypted.userId
+                }
+              }
+            }
+          ],
+          name: {
+            contains: search,
+            mode: 'insensitive'
+          },
+        },
+        ...(
+          nonFollowCursor && nonFollowCursor.length !== 0 ?
+          { skip: 1, cursor: { name: nonFollowCursor } } :
+          {}
+        ),
+        orderBy: {
+          name: 'asc'
+        },
+        take: num - players.length,
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          elo: true
+        }
+      });
+      nfcursor = additionalPlayers.length > 0 ? additionalPlayers[additionalPlayers.length - 1].name : nonFollowCursor;
+    }
+
+    console.log('finished fetching', players, additionalPlayers);
+
+    const userStatus: Map<string, PlayersMapObjectType> | undefined = global.userStatus;
+
+    if (!userStatus) {
+      throw new Error("Player's status is not available");
+    }
+
     return {
-      data: players,
+      data: {
+        follow: 
+          players.map(player => {
+            const status = userStatus.get(player.id);
+            let playing: boolean = false, streaming: boolean = false;
+
+            if (status) {
+              for (const value of status?.socket) {
+                if (!playing && value[1].playing) playing = true;
+                if (!streaming && value[1].streaming) streaming = true;
+                if (playing && streaming) break;
+              }
+            }
+            
+            return {
+              ...player,
+              online: status?.online || false,
+              playing,
+              streaming
+            };
+          }),
+        nonFollow:
+          (
+            additionalPlayers ?
+            additionalPlayers.map(player => {
+              const status = userStatus.get(player.id);
+              let playing: boolean = false, streaming: boolean = false;
+  
+              if (status) {
+                for (const value of status.socket) {
+                  if (!playing && value[1].playing) playing = true;
+                  if (!streaming && value[1].streaming) streaming = true;
+                  if (playing && streaming) break;
+                }
+              }
+              
+              return {
+                ...player,
+                online: status?.online || false,
+                playing,
+                streaming
+              };
+            }) : []
+          )   
+      },
+      cursors: { follow: fCursor,
+        nonFollow: nfcursor
+      },
       error: null
     }
   } catch (e) {
-    return { data: null, error: 'failed to fetch players' };
+    console.log(e);
+    return { data: null, error: 'failed to fetch players', cursors: { follow: '', nonFollow: '' } };
   }
 }
+
+// fetch player stat
+export const getPlayerStat = async (id: string): Promise<{
+  data: PlayerStatType | null;
+  error: string | null;
+}> => {
+  // authenticate
+  const decrypted = await authenticate();
+  if (!decrypted) return { data: null, error: 'unauthorized' };
+
+  if (!id) return { data: null, error: 'Invalid Id' };
+
+  try {
+    const [ player, win, lose, draw, followed ] = await Promise.all([
+      prisma.users.findUnique({
+        where: {
+          id
+        },
+        select: {
+          _count: {
+            select: {
+              followers: true
+            }
+          },
+          image: true,
+          email: true,
+          id: true,
+          name: true,
+          elo: true
+        }
+      }),
+      prisma.gamePlayer.count({
+        where: {
+          userId: id,
+          outcome: 'W'
+        }
+      }),
+      prisma.gamePlayer.count({
+        where: {
+          userId: id,
+          outcome: 'L'
+        }
+      }),
+      prisma.gamePlayer.count({
+        where: {
+          userId: id,
+          outcome: 'D'
+        }
+      }),
+      prisma.users.count({
+        where: {
+          id,
+          followers: {
+            some: {
+              followerId: decrypted.userId
+            }
+          }
+        }
+      })
+    ])
+
+    if (!player) throw 'error';
+
+    const playerStatus: PlayersMapObjectType | undefined = global.userStatus?.get(id);
+    let playing: boolean = false, streaming: boolean = false, online: boolean = false;
+
+    if (playerStatus) {
+      for (const value of playerStatus.socket) {
+        if (!playing && value[1].playing) playing = true;
+        if (!streaming && value[1].streaming) streaming = true;
+        if (playing && streaming) break;
+      }
+      online = true;
+    }
+
+    console.log('fetch', player);
+
+    return { data: {
+      ...player,
+      win,
+      lose,
+      draw,
+      online,
+      streaming,
+      playing,
+      followed: followed != 0 ? true : false 
+    }, error: null };
+  } catch (e) {
+    console.log(e);
+    return { data: null, error: 'Player Info fetching failed' };
+  }
+}
+
+export const getStreams = async (search: string, cursor?: string, nums: number = 50
+): Promise<{ data: null | StreamCardsInfoType[], error: null | string, cursor?: string }> => {
+  // authenticate
+  const decrypted = await authenticate();
+  if (!decrypted) return { data: null, error: 'unauthorized' };
+
+  // async function pause() {
+  //   return new Promise((resolve) => setTimeout(resolve, 2500));
+  // }
+
+  // await pause();
+
+  const number = nums === 0 ? 50 : nums;
+
+  const streamsKeys = global.streamsKeys;
+  const streamsInfos = global.streamsInfos;
+  if (!streamsInfos || !streamsKeys) return { data: null, error: 'server error' };
+
+  const keys = streamsKeys.filter((names) => names.toLowerCase().includes(search.toLowerCase()));
+  if (cursor) {
+    const cursorIndex = keys.indexOf(cursor);
+    if (cursorIndex > -1) {
+      keys.splice(0, cursorIndex + 1);
+    }
+  }
+
+  // console.log(keys, search, keys.length);
+  if (keys.length === 0) return { data: [], error: null}
+  keys.splice(number, keys.length);
+  
+  const streamsInfosFilterd = keys.map(key => {
+    return streamsInfos.get(key) as StreamCardsInfoType;
+  })
+
+  return {
+    data: streamsInfosFilterd,
+    error: null,
+    cursor: keys.at(-1)
+  }
+}
+
+//1c35ccc8-aa05-4e63-871f-5cb207355b32
+//e11f71b6-8fd3-4eee-bc28-b622fe7e2ab2

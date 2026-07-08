@@ -6,9 +6,11 @@ import { RiEdit2Line } from "react-icons/ri";
 import { FaCheck } from "react-icons/fa";
 import Image from 'next/image';
 import Button from '@/_components/wrappers/button';
+import useUserDet from '@/_lib/context/userDetailsContext';
 
 const AccountWindow = ({ close }: { close: () => void }) => {
   const [ editAccount, setEditAccount ] = useState<boolean>(false);
+  const userDet = useUserDet();
 
   return (
     <div className='absolute flex w-full h-full justify-center items-center backdrop-blur-sm bg-black/40 z-20'>
@@ -44,7 +46,7 @@ const AccountWindow = ({ close }: { close: () => void }) => {
             }
 
             {/** avatar */}
-            <Image unoptimized src={'https://api.dicebear.com/9.x/avataaars/svg?seed=337987&sex=male'} alt='avatar' width={100} height={100} className='rounded-full overflow-hidden w-full bg-brown2 p-1 cursor-pointer' />
+            <Image unoptimized src={userDet.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} alt='avatar' width={100} height={100} className='rounded-full overflow-hidden w-full bg-black p-1 cursor-pointer' />
 
           </Button>
 
@@ -52,14 +54,14 @@ const AccountWindow = ({ close }: { close: () => void }) => {
           <form action="" className='flex flex-col w-full'>
             <fieldset disabled={!editAccount} className='flex flex-col w-full'>
               <div className='flex flex-col gap-2 mt-4 w-full bg-back3 p-1'>
-                <label htmlFor='name' className='text-xs text-brown1 md:text-sm'>Name</label>
-                <input id='name' name='name' type='text' className='text-fore2 md:text-lg p-2' defaultValue={'John Doe'} />
+                <label htmlFor='name' className='text-xs text-brown1 md:text-sm'>Username</label>
+                <input id='name' name='name' type='text' className='text-fore2 md:text-lg p-2' defaultValue={userDet.name} />
               </div>
 
               {/** email */}
               <div className='flex flex-col gap-2 mt-4 w-full bg-back3 p-1'>
                 <label htmlFor='email' className='text-xs text-brown1 md:text-sm'>Email</label>
-                <input name='email' id='email' type='email' className='text-fore2 md:text-lg p-2' defaultValue={'johndoe@email.com'} />
+                <input name='email' id='email' type='email' className='text-fore2 md:text-lg p-2' defaultValue={userDet.email} />
               </div>
             </fieldset>
 
@@ -80,7 +82,7 @@ const AccountWindow = ({ close }: { close: () => void }) => {
                 </Button>
               </div> :
               <div className='flex justify-end flex-row w-full mt-4'>
-                <Button bgspan='fore/20' onClick={() => setEditAccount(true)} type='button' title='edit' className='p-2 hover:bg-brown3 bg-brown2 text-fore1 rounded-full text-2xl md:p-3 md:text-3xl cursor-pointer'>
+                <Button bgspan='fore/20' onClick={() => setEditAccount(true)} type='button' title='edit' className='p-2 hover:bg-brown2 bg-brown3 text-fore1 rounded-full text-2xl md:p-3 md:text-3xl cursor-pointer'>
                   <RiEdit2Line />
                 </Button>
               </div>

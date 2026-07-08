@@ -17,3 +17,15 @@ export const formatFollowers = (count: number) => {
 
   return formatted;
 }
+
+export const insertSort = <T>(arr: T[], item: T, compareFn: (a: T, b: T) => number): T[] => {
+  let lo = 0, hi = arr.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (compareFn(arr[mid], item) < 0) lo = mid + 1;
+    else hi = mid;
+  }
+
+  arr.splice(lo, 0, item);
+  return arr;
+}

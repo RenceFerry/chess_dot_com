@@ -31,7 +31,7 @@ export default function RootLayout({
     <QueryProvider>
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-dvh relative no-text-cursor no-text-select`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-dvh relative no-text-cursor no-text-select min-h-0 min-w-0`}
         >
         <Notification />
         {children}

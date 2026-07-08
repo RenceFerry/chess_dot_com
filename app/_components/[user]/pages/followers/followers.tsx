@@ -14,8 +14,8 @@ const Followers = ({ followers, viewProfile }: { followers: PlayersType[]; viewP
 
             {/** online dot */}
             <div className={clsx('h-4 w-4 rounded-full absolute top-1 left-1', {
-              'bg-green3': follower.status === 'online',
-              'bg-error3': follower.status === 'offline',
+              'bg-green3': follower.online,
+              'bg-error3': !follower.online,
             })}/>
 
             {/** profile pic */}
@@ -30,17 +30,17 @@ const Followers = ({ followers, viewProfile }: { followers: PlayersType[]; viewP
               {/** playing and streaming */}
               <div className='text-fore1 text-sm md:text-lg'>
                 <span className={clsx({
-                  'text-error1': follower.playing === 'not playing',
-                  'text-green1': follower.playing === 'playing'
+                  'text-error1': !follower.playing,
+                  'text-green1': follower.playing
                 })}>
-                  {follower.playing}
+                  {follower.playing ? 'Playing' : 'Not Playing'}
                 </span>
                 &nbsp; | &nbsp;
                 <span className={clsx({
-                  'text-error1': follower.stream === 'not streaming',
-                  'text-green1': follower.stream === 'streaming'
+                  'text-error1': !follower.streaming,
+                  'text-green1': follower.streaming
                 })}>
-                  {follower.stream}
+                  {follower.streaming ? 'Streaming' : 'Not Streaming'}
                 </span>
                 </div>
             </div>

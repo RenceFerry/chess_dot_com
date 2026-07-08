@@ -34,7 +34,7 @@ const Page = () => {
         <Navbar activeTab={currentTab || 'home'} change={changeTab}/>
 
         {/** pages */}
-        <div className="flex-1 w-full bg-back3 lg:h-full min-h-0 lg:flex-1">
+        <div className="flex-1 w-full bg-back3 lg:h-full min-h-0 min-w-0 lg:flex-1">
 
           {/** home */}
           { currentTab === 'home' &&

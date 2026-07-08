@@ -35,7 +35,7 @@ const More = () => {
           <Button bgspan='fore/10' className='cursor-pointer w-full h-10'>
             <Link href='/user/followers' className='w-full h-full flex px-2 items-center flex-row hover:bg-back2 gap-5'>
               <GiShadowFollower className='text-2xl text-brown2' />
-              <h1>Followers / Followed</h1>
+              <h1>Followers / Following</h1>
             </Link>
           </Button>
         </div>

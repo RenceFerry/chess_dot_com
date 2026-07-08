@@ -22,7 +22,7 @@ const Page = ({ children }: {
   }, [socket]);
 
   return (
-    //<UserDetailsProvider>
+    <UserDetailsProvider>
     <div className='h-dvh w-dvw min-w-0 min-h-0 flex flex-col'>
 
       {/** topsection */}
@@ -33,7 +33,7 @@ const Page = ({ children }: {
         {children}
       </div>
     </div>
-    //</UserDetailsProvider>
+    </UserDetailsProvider>
   )
 }
 

@@ -40,21 +40,21 @@ const ProfileDetails = () => {
     <>
       {/** profile pic */}
       <div className='h-34 w-34 sm:w-64 sm:h-64 md:h-84 md:w-84 rounded-full object-cover overflow-hidden relative'>
-        <Image fill alt='profile picture' src={userStat?.image || demo} className='object-cover w-full h-full bg-back2' />
+        <Image fill alt='profile picture' src={userStat?.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} className='object-cover w-full h-full bg-back2' />
       </div>
 
       {/** user details */}
       <div className='flex flex-col items-center justify-center gap-2 md:h-full p-4'>
 
-        <h1 className='text-brown1 text-lg font-semibold md:text-3xl'>{userStat?.name} ({userStat.elo})</h1>
+        <h1 className='text-brown1 text-lg font-semibold md:text-3xl'>{userStat?.name.split(' ')[0]} ({userStat.elo})</h1>
 
         <Button bgspan='fore/40' className='w-fit h-fit p-2 hover:bg-back2'>
           <Link href={'/user/followers'} className='w-full h-full text-fore1 text-sm md:text-xl font-semibold'>
-            {formatFollowers(userStat._count.followers)} followers
+            {formatFollowers(userStat._count.followers)} follower{userStat._count.followers > 1 && 's'}
           </Link>
         </Button>
 
-        <p className='text-sm font-semibold text-fore1 md:text-xl'>{userStat?.win + userStat?.draw + userStat?.lose} Games</p>
+        <p className='text-sm font-semibold text-fore1 md:text-xl'>{userStat?.win + userStat?.draw + userStat?.lose} Game{userStat?.win + userStat?.draw + userStat?.lose > 1 && 's'}</p>
 
         <p className='text-sm font-semibold md:text-xl text-fore1'><span className='text-green3'>W:</span> {userStat.win}&emsp; <span className='text-error2'>L:</span> {userStat.lose}&emsp; <span className='text-brown2'>D:</span> {userStat.draw}</p>
         
