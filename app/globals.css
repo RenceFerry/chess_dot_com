@@ -107,11 +107,46 @@ tbody tr:hover td {
   animation: scaleFeedback 0.15s ease-in-out;
 }
 
+.circleFrame {
+  box-shadow: 0px 0px 0px 99999px rgba(0, 0, 0, 0.75);
+}
+
 @keyframes scaleFeedback {
   from {
     opacity: 100%;
   }
   to {
     opacity: 0;
+  }
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+.center {
+  @apply flex justify-center items-center
+}
+
+.animate-waiting {
+  animation: waiting 1.25s infinite;
+  background-color: var(--back1);
+}
+
+.animate-waiting:nth-child(1) { animation-delay: 0s;}
+.animate-waiting:nth-child(2) { animation-delay: 0.1s;}
+.animate-waiting:nth-child(3) { animation-delay: 0.2s;}
+.animate-waiting:nth-child(4) { animation-delay: 0.3s;}
+.animate-waiting:nth-child(5) { animation-delay: 0.4s;}
+.animate-waiting:nth-child(6) { animation-delay: 0.5s;}
+.animate-waiting:nth-child(7) { animation-delay: 0.6s;}
+
+@keyframes waiting {
+  0%, 100% {
+    background-color: var(--brown1);
+  }
+  50% {
+    background-color: var(--back1);
   }
 }

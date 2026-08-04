@@ -26,7 +26,7 @@ const Play = () => {
   const { data: players, isPending, isError, isFetching } = useQuery({
     queryKey: ['searchPlayers', search],
     queryFn: async () => {
-      console.log('query for', search, cursors.current);
+      //console.log('query for', search, cursors.current);
       const { data, error, cursors: newCursors } = await getPlayers(search, '', '', playersNumRef.current);
 
       if (error || !data) throw new Error(error || '');
@@ -35,7 +35,7 @@ const Play = () => {
       playersNumRef.current = (data?.follow.length || 0) + (data?.nonFollow.length || 0);
       cursors.current = newCursors;
 
-      console.log('query result', data, cursors.current);
+      //console.log('query result', data, cursors.current);
 
       return structuredClone(data);
     },
@@ -87,8 +87,8 @@ const Play = () => {
 
     // automatic fetch when scrolling
     const observer = new IntersectionObserver(async ([ent]) => {
-      console.log('observer', ent.isIntersecting, !isPending, !isFetching, !nomore.current, cursors.current);
-      if (ent.isIntersecting && !isPending && !isFetching && !nomore.current) {
+      console.log('observer', ent.isIntersecting, !isPending, !isFetching, !nomore.current, !isFetchingMore);
+      if (ent.isIntersecting && !isPending && !isFetching && !nomore.current && !isFetchingMore) {
         await reFetch();
       }
     },
@@ -100,12 +100,12 @@ const Play = () => {
 
     if (divObserverRef.current) {
       observer.observe(divObserverRef.current);
-    }
+    };
 
     return () => {
       observer.disconnect();
     };
-  }, [ isFetching, isPending, queryClient, search, players, nomore ]);
+  }, [ isFetching, isPending, queryClient, search, players, nomore, isFetchingMore ]);
 
   //view card
   function viewProfile(id: string) {

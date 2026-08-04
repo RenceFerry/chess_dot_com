@@ -8,7 +8,7 @@ export const ProfileCardSkeleton = ({ close }: { close: () => void }) => {
     <div className='absolute z-100 top-0 left-0 justify-center items-center w-full h-full flex backdrop-blur-xs bg-black/40 rounded-[inherit] min-w-0'>
 
       {/** the actual card */}
-      <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-64 w-[65%] max-w-150'>
+      <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-64 w-[90%] md:w-65/100 max-w-150'>
 
         {/** title & close button */}
         <div className='w-full flex flex-row p-3 justify-end'>
@@ -84,7 +84,7 @@ export const PlayersSkeleton = () => {
     <>
       {
         Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className='mx-auto flex flex-row h-18 md:h-20 rounded-full w-[80%] max-w-200 bg-back px-1 relative shrink-0 transform transition-all ease-in-out duration-300 hover:scale-103 hover:brightness-125 cursor-pointer animate-pulse'>
+          <div key={i} className='mx-auto flex flex-row h-18 md:h-20 rounded-full w-95/100 md:w-[80%] max-w-200 bg-back px-1 relative shrink-0 transform transition-all ease-in-out duration-300 hover:scale-103 hover:brightness-125 cursor-pointer animate-pulse'>
 
             {/** profile pic */}
             <div className='h-16 md:h-18 md:w-18 w-16 rounded-full my-auto bg-back2' />
@@ -150,5 +150,46 @@ export const StreamCardsSkeleton = () => {
         ))
       }
     </>
+  )
+}
+
+export const ChangePasswordSkeleton = ({ close }: {close: () => void}) => {
+  return (
+    <div className='absolute z-100 rounded-[inherit] w-full h-full flex justify-center items-center backdrop-blur-xs bg-black/10 p-5'>
+
+      {/** actual card */}
+      <div className='w-full max-w-100 border border-brown2 bg-back4 rounded-lg flex flex-col'>
+
+        {/** top section */}
+        <div className='flex flex-row p-3 justify-between items-center'>
+
+          {/** title */}
+          <h1 className='text-brown1'>Change your password</h1>
+
+          {/** close */}
+          <Button bgspan='fore/20' onClick={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+            <IoClose className='text-fore2 text-xl' />
+          </Button>
+        </div>
+
+        {/** content */}
+        <div className='flex flex-col py-2 px-10 gap-5 items-center w-full animate-pulse'>
+
+          {/** current pass */}
+          <div className='w-full h-10 bg-back2 flex flex-col' />
+
+          {/** new pass */}
+          <div className='w-full h-10 bg-back2 flex flex-col' />
+          
+          {/** confirm new pass */}
+          <div className='w-full h-10 bg-back2 flex flex-col' />
+
+          {/** submit button */}
+          <div className='w-full flex flex-row justify-end'>
+            <div className='w-18 h-10 rounded-md bg-back2' />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

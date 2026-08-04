@@ -10,11 +10,10 @@ import { getPlayerStat } from '@/_utils/serverActions/fetchActions';
 import { formatFollowers } from '@/_utils/helpers';
 import { ProfileCardSkeleton } from '../skeletons';
 import useUserDet from '@/_lib/context/userDetailsContext';
+import InviteCard from './inviteCard';
 
 const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
   const [ showInviteCard, setShowInviteCard ] = useState<boolean>(false);
-  const [ inputValue, setInputValue ] = useState<string>('');
-  const userInfo = useUserDet();
 
   // fetch player's information
   const { data: player, isError, isPending } = useQuery({
@@ -29,12 +28,7 @@ const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
     staleTime: 1000 * 30,
   })
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const input = e.target;
-
-    if (input.value.length > 30) return;
-    setInputValue(input.value);
-  }
+  
 
   // loading page
   if (isPending) return <ProfileCardSkeleton close={close} />
@@ -43,7 +37,7 @@ const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
     <div className='absolute z-100 top-0 left-0 justify-center items-center w-full h-full flex backdrop-blur-xs bg-black/40 rounded-[inherit] min-w-0'>
 
       {/** the actual card */
-        <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-64 w-[65%] max-w-150'>
+        <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-80 w-[90%] md:w-65/100 max-w-150'>
 
           {/** title & close button */}
           <div className='w-full flex flex-row p-3 justify-end'>
@@ -68,10 +62,13 @@ const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
                   <Button bgspan='fore/20' className='h-full aspect-square rounded-full bg-brown2/40 p-1 cursor-pointer max-h-48'>
 
                     {/** avatar */}
-                    <Image fill unoptimized={true} src={player?.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} loading='eager' alt='avatar' className='h-full w-full rounded-full object-cover' />
+                    <Image fill unoptimized={false} src={player?.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} loading='eager' alt='avatar' className='h-full w-full rounded-full object-cover' />
 
                     {/** status dot */}
-                    <div className={clsx('h-4 w-4 bg-green2 rounded-full absolute top-1/12 left-1/12')} />
+                    <div className={clsx('h-[10%] aspect-square rounded-full absolute top-2/20 left-2/20 border-back1 border', {
+                      'bg-green2': player.online,
+                      'bg-error2': !player.online
+                    })} />
                   </Button>
                 </div>
 
@@ -126,84 +123,15 @@ const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
                 
               </div>
 
-            </div> :
+              {/** note */}
+              <p className='px-10 py-3 text-fore2 text-xs md:text-sm text-center'>You could still invite players, even though they&apos;re offline, they will be notified once they become online.</p>
+            </div> 
+            :
 
             // invite card
-            <div className='flex w-full flex-col gap-4 min-w-0'>
-
-              {/** vs */}
-              <div className='flex flex-row w-full justify-center items-center py-2 px-5 gap-4 bg-back3'>
-
-                {/** player avatar & name */}
-                <div className='flex flex-col gap-3 items-center w-1/2 max-w-40'>
-
-                  {/** avatar */}
-                  <Image unoptimized src={userInfo.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} width={20} height={20} alt='avatar' className='w-full aspect-square rounded-full object-cover bg-brown2/40 p-1' />
-
-                  {/** name */}
-                  <h1 className='text-fore1 text-md text-center md:text-xl font-semibold'>{userInfo.name} ({userInfo.elo})</h1>
-                </div>
-
-                {/** vs */}
-                <h1 className='text-error2 text-5xl font-semibold'>VS</h1>
-
-                {/** opponent avatar & name */}
-                <div className='flex flex-col gap-3 items-center w-1/2 max-w-40'>
-
-                  {/** avatar */}
-                  <Image unoptimized src={player.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} width={20} height={20} alt='avatar' className='w-full aspect-square rounded-full object-cover bg-brown2/40 p-1' />
-
-                  {/** name */}
-                  <h1 className='text-fore1 text-md text-center md:text-xl font-semibold'>{player.name} ({player.elo})</h1>
-                </div>
-              </div>
-
-              {/** options */}
-              <form className='flex flex-col w-full gap-3 items-center p-5 min-w-0'>
-                
-                {/** piece color */}
-                <div className='flex flex-col w-full items-center'>
-                  <label className='text-fore2' htmlFor='pieceColor'>
-                    Select your piece color
-                  </label>
-                  <select id='pieceColor' className='w-1/2 min-w-64 max-w-75 bg-back rounded-lg text-fore1 p-3' name='pieceColor' title='piece color' defaultValue="white">
-                    <option value="" disabled>Select your piece color</option>
-                    <option value="black">Black</option>
-                    <option value="white">White</option>
-                    <option value="random">Random</option>
-                  </select>
-                </div>
-
-                {/** mode */}
-                <div className='flex flex-col w-full items-center'>
-                  <label className='text-fore2' htmlFor='pieceColor'>
-                    Select game mode
-                  </label>
-                  <select id='pieceColor' className='w-1/2 min-w-64 max-w-75 bg-back rounded-lg text-fore1 p-3' name='pieceColor' title='piece color' defaultValue="classic">
-                    <option value="" disabled>Mode</option>
-                    <option value="classic">Classic</option>
-                    <option value="rapid">Rapid</option>
-                    <option value="blitz">Blitz</option>
-                    <option value="bullet">Bullet</option>
-                  </select>
-                </div>
-
-                {/** message and submit button */}
-                <div className='flex-col gap-2 flex flex-wrap items-center justify-center w-full'>
-
-                  {/** message input */}
-                  <input onChange={handleChange} value={inputValue} title='message' type='text' placeholder='send a message' className='h-10 w-1/2 min-w-64 max-w-75 bg-back2 p-2 rounded-lg' />
-
-                  {/** char count */}
-                  <h2 className='text-fore2'>{inputValue.length}/30</h2>
-
-                  {/** invite */}
-                  <Button bgspan='back4/20' className='h-10 w-64 rounded-lg min-w-20 py-2 px-3 bg-green2 text-back4 font-semibold'>
-                    Invite
-                  </Button>
-                </div>
-              </form>
-            </div>:
+            <InviteCard player={player} /> 
+            :
+            /// error
             <div className='flex flex-row justify-center items-center py-10 text-fore2 text-lg font-semibold'>
               {"Fetching player's information failed"}
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { IoArrowBackSharp } from "react-icons/io5";
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import WithStream from '@/_components/[user]/pages/withStream';

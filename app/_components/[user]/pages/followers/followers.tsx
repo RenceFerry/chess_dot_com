@@ -5,49 +5,50 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import Button from "@/_components/wrappers/button";
 
-const Followers = ({ followers, viewProfile }: { followers: PlayersType[]; viewProfile: (id: string) => void }) => {
+const Followers = ({ players, viewProfile }: { players: PlayersType[]; viewProfile: (id: string) => void }) => {
+
   return (
-    <div className='flex-1 flex w-full flex-col bg-back3 py-5 gap-4 overflow-scroll no-scrollbar min-h-0 min-w-0'>
+    <>
       {
-        followers.map((follower: PlayersType, i: number) => (
-          <Button onClick={() => viewProfile('1')} bgspan='fore/40' key={i} className='mx-auto flex flex-row h-18 md:h-20 rounded-full w-[80%] max-w-200 bg-back px-1 relative shrink-0 transform transition-all ease-in-out duration-300 hover:scale-103 hover:brightness-125 cursor-pointer'>
+        players.map((player: PlayersType, i: number) => (
+          <Button onClick={() => viewProfile(player.id)} bgspan='fore/40' key={i} className='mx-auto flex flex-row h-18 md:h-20 rounded-full w-[90%] md:w-8/10 max-w-200 bg-back px-1 relative shrink-0 transform transition-all ease-in-out duration-300 hover:scale-103 hover:brightness-125 cursor-pointer'>
 
             {/** online dot */}
             <div className={clsx('h-4 w-4 rounded-full absolute top-1 left-1', {
-              'bg-green3': follower.online,
-              'bg-error3': !follower.online,
+              'bg-green3': player.online,
+              'bg-error3': !player.online,
             })}/>
 
             {/** profile pic */}
-            <Image unoptimized src={'https://api.dicebear.com/9.x/avataaars/svg?seed=337987&sex=male'} width={20} height={20} alt='avatar' className='h-16 md:h-18 md:w-18 w-16 rounded-full my-auto' />
+            <Image unoptimized={false} src={player.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} width={72} height={72} alt='avatar' className='h-16 md:h-18 md:w-18 w-16 rounded-full my-auto' />
 
-            {/** follower details */}
+            {/** player details */}
             <div className="flex-1 flex flex-row py-2 px-4 items-center justify-between ">
 
               {/** name */}
-              <h1 className='text-md font-semibold md:text-xl'>{follower.name}</h1>
+              <h1 className='text-md font-semibold md:text-xl'>{player.name}</h1>
 
               {/** playing and streaming */}
               <div className='text-fore1 text-sm md:text-lg'>
                 <span className={clsx({
-                  'text-error1': !follower.playing,
-                  'text-green1': follower.playing
+                  'text-error1': !player.playing,
+                  'text-green1': player.playing
                 })}>
-                  {follower.playing ? 'Playing' : 'Not Playing'}
+                  {player.playing ? 'Playing' : 'Not Playing'}
                 </span>
                 &nbsp; | &nbsp;
                 <span className={clsx({
-                  'text-error1': !follower.streaming,
-                  'text-green1': follower.streaming
+                  'text-error1': !player.streaming,
+                  'text-green1': player.streaming
                 })}>
-                  {follower.streaming ? 'Streaming' : 'Not Streaming'}
+                  {player.streaming ? 'Streaming' : 'Not Streaming'}
                 </span>
                 </div>
             </div>
           </Button>
         ))
       }
-    </div>
+    </>
   )
 }
 

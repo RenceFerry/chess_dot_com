@@ -98,7 +98,7 @@ export const loginSA = async (initialState: StateAuthForm, formData: FormData): 
   return {
     code: 0,
     message: 'Login successful',
-    redirect: `/${name.replace(' ', '')}`,
+    redirect: `/${name.replaceAll(' ', '')}`,
   }
 }
 
@@ -333,7 +333,14 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
         email,
         name,
         password,
-        image
+        image,
+        settings: {
+          create: {
+            streamGame: false,
+            chatDisable: false,
+            chatPrivate: false
+          }
+        }
       }
     })
   } catch (e) {

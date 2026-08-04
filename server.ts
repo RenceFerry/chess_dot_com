@@ -4,7 +4,7 @@ import next from 'next';
 import { Server } from 'socket.io';
 import 'dotenv/config';
 import * as cookie from 'cookie';
-import type { PlayersMapObjectType, SessionPayload, StreamCardsInfoType } from '@/_lib/types';
+import type { InvitationStateType, PlayersMapObjectType, SessionPayload, StreamCardsInfoType } from '@/_lib/types';
 import { jwtVerify } from 'jose';
 import initializeEvents from '@/_utils/serverSocketEvents/events';
 import { streams } from '@/_lib/test';
@@ -24,9 +24,14 @@ app.prepare().then(() => {
     handle(req, res, parseUrl);
   });
 
+  //////////// maps
+  // user status for holding sockets, online etc
   const userStatus = new Map<string, PlayersMapObjectType>();
+  // for streams
   const streamsInfos = new Map<string, StreamCardsInfoType>();
   const streamsKeys = new Array<string>();
+  // for invitations
+  const invitations = new Map<string, InvitationStateType>();
 
   // temporarily populate streams data
   streams.forEach((stream) => {
@@ -71,7 +76,7 @@ app.prepare().then(() => {
 
       socket.data.user = payload.payload as SessionPayload;
 
-    } catch (error) {
+    } catch (_) {
       return next(new Error('Invalid session'));
     }
 
@@ -81,16 +86,17 @@ app.prepare().then(() => {
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.data.user.name}`);
 
-    userStatus.set('e11f71b6-8fd3-4eee-bc28-b622fe7e2ab2', {
-      userId: 'e11f71b6-8fd3-4eee-bc28-b622fe7e2ab2',
-      name: 'Clarence Ferry',
-      online: true,
-      socket: new Map([[socket.id, {
-        playing: true,
-        streaming: true,
-        socket: socket
-      }]])
-    });
+    // check if it works
+    // userStatus.set('e11f71b6-8fd3-4eee-bc28-b622fe7e2ab2', {
+    //   userId: 'e11f71b6-8fd3-4eee-bc28-b622fe7e2ab2',
+    //   name: 'Clarence Ferry',
+    //   online: true,
+    //   socket: new Map([[socket.id, {
+    //     playing: true,
+    //     streaming: true,
+    //     socket: socket
+    //   }]])
+    // });
 
     // store user status in the map
     if (userStatus.has(socket.data.user.userId)) {
@@ -110,7 +116,7 @@ app.prepare().then(() => {
           playing: false,
           streaming: false,
         }]])
-      })
+      });
     }
     
     initializeEvents(socket);
@@ -125,8 +131,8 @@ app.prepare().then(() => {
         user.socket.delete(socket.id);
         if (user.socket.size === 0) {
           userStatus.delete(socket.data.user.userId);
-        }
-      }
+        };
+      };
     });
   })
 
@@ -134,8 +140,25 @@ app.prepare().then(() => {
   global.userStatus = userStatus;
   global.streamsInfos = streamsInfos;
   global.streamsKeys = streamsKeys;
+  global.invitations = invitations;
 
-  server.listen(port, () => {
+  // for deleting stale temp data
+  const int = setInterval(() => {
+    // delete expired invitations
+    for (const [key, val] of invitations) {
+      for (const [key1, val1] of val.map) {
+        if (val1.ex < Date.now()) {
+          val.map.delete(key1);
+          val.keys = val.keys.filter(k => k !== key1);
+        }
+      }
+      if (val.map.size === 0) {
+        invitations.delete(key);
+      }
+    }
+  }, 1000 * 60 * 5)
+
+  server.listen(port, '0.0.0.0', () => {
     console.log(">> Ready on port " + port);
   });
 })

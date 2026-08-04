@@ -6,6 +6,7 @@ declare global {
   var streamsInfos: Map<string, StreamCardsInfoType> | undefined;
   var streamsKeys: string[] | undefined;
   var userStatus: Map<string, PlayersMapObjectType> | undefined;
+  var invitations: Map<string, InvitationStateType> | undefined;
 }
 
 export {};

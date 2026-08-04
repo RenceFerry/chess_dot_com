@@ -2,7 +2,7 @@
 
 import prisma from "@/_lib/prisma";
 import { authenticate} from "./authenticate";
-import type { PlayerStatType, UserInfo, UserStatType, GameHistoryType, PlayersType, PlayersMapObjectType, StreamCardsInfoType } from "../../_lib/types";
+import type { PlayerStatType, UserInfo, UserStatType, GameHistoryType, PlayersType, PlayersMapObjectType, StreamCardsInfoType, PlayerInfo } from "../../_lib/types";
 
 // fetch game history of a user
 export const fetchGameHistory = async (): Promise<{ data: GameHistoryType[]; error: string | null}> => {
@@ -65,17 +65,43 @@ export const getUserDet = async (): Promise<{ data: UserInfo | null; error: stri
           select: {
             followers: true,
           }
+        },
+        settings: {
+          select: {
+            chatDisable: true,
+            chatPrivate: true,
+            streamGame: true
+          }
         }
       }
-    })
+    });
 
-    console.log('hello b');
-
+    //const user = null;
+    
     if (!user) {
       throw new Error();
     }
 
-  
+    console.log('hello b', user?.image);
+    
+
+    if (!user.settings) {
+      const  res = await prisma.settings.create({
+        data: {
+          userId: user.id
+        },
+        select: {
+          chatDisable: true,
+          chatPrivate: true,
+          streamGame: true
+        }
+      })
+
+      console.log(user);
+      return { data: { ...user, settings: {...res} }, error: null};
+    }
+
+    console.log(user);
     return { data: user, error: null};
   } catch (e) {
     console.log(e);
@@ -426,6 +452,165 @@ export const getStreams = async (search: string, cursor?: string, nums: number =
     data: streamsInfosFilterd,
     error: null,
     cursor: keys.at(-1)
+  }
+}
+
+export const getFollowPlayers = async (search: string, what: 'followers' | 'following', cursor?: string, nums: number = 25): Promise<{
+  data: PlayersType[] | null,
+  error: string | null
+}> => {
+  // authenticate
+  const decrypted = await authenticate();
+  if (!decrypted) return { data: null, error: 'unauthorized' };
+
+  const take = nums === 0 ? 25 : nums;
+
+  // paause
+  // const pause = async () => new Promise((resolve) => setTimeout(resolve, 2500))
+  // await pause();
+
+  try {
+    // userstatus
+    const usersStatus = global.userStatus;
+    if (!usersStatus) throw 'error';
+
+    // fetch players
+    const players = await prisma.users.findMany({
+      where: {
+        name: {
+          contains: search,
+          mode: 'insensitive'
+        },
+        id: { not: decrypted.userId },
+        // fetch depends on what
+        ...(
+          what === 'followers' ? {
+            following: {
+              some: {
+                playerId: decrypted.userId
+              }
+            }
+          } : {
+            followers: {
+              some: {
+                followerId: decrypted.userId
+              }
+            }
+          }
+        )
+      },
+      ...(
+        cursor ? {
+          cursor: { name: cursor },
+          skip: 1
+        } : {}
+      ),
+      take,
+      orderBy: { name: 'asc' },
+      select: {
+        name: true,
+        elo: true,
+        image: true,
+        id: true,
+      }
+    });
+
+    // attach streaming, onlline and playing to players  data
+    const data = players.map((player) => {
+      let streaming = false, online = false, playing = false;
+      const status: PlayersMapObjectType | null = usersStatus.get(player.id);
+
+      if (status) {
+        online = true;
+
+        for (const [, value] of status.socket) {
+          if (value.playing) playing = true;
+          if (value.streaming) streaming = true;
+          if (playing && streaming) break;
+        }
+      }
+
+      return {
+        ...player,
+        online,
+        streaming,
+        playing
+      }
+    })
+
+    return {
+      data,
+      error: null
+    }
+
+  } catch (e) {
+    return {
+      data: null,
+      error: 'server error'
+    }
+  }
+}
+
+export const checkIfPassword = async (): Promise<{ hasPassword: null | boolean; error: string | null}> => {
+  // authenticate
+  const decrypted = await authenticate();
+  if (!decrypted) return { hasPassword: null, error: 'unauthorized' };
+
+  try {
+    const password = await prisma.users.findUnique({
+      where: {
+        id: decrypted.userId
+      },
+      select: {
+        password: true
+      }
+    })
+
+    if (!password) return { hasPassword: null, error: "canno't find user" };
+
+    return {
+      hasPassword: Boolean(password.password),
+      error: null
+    }
+  } catch (e) {
+    return { hasPassword: null, error: 'server error' };
+  }
+}
+
+export const getPlayerInfo = async (id: string): Promise<{
+  data: PlayerInfo | null;
+  error: null | string
+}> => {
+  // authenticate
+  const decrypted = await authenticate();
+  if (!decrypted) return { data: null, error: 'unauthorized' };
+  if (!id) return { data: null, error: 'invalid user' };
+
+  try {
+    const player = await prisma.users.findUnique({
+      where: {
+        id
+      },
+      select: {
+        name: true,
+        id: true,
+        elo: true,
+        image: true
+      }
+    })
+
+    if (!player) throw 'cannot find user';
+
+    return {
+      data: player,
+      error: null
+    }
+
+  } catch (e) {
+    return {
+      data: null,
+      error: 'server error'
+    }
   }
 }
 

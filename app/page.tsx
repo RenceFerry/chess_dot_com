@@ -5,8 +5,11 @@ import bgChessBoard from '@/assets/chessboard-background.346891ba.png';
 import { FaChessPawn } from "react-icons/fa";
 import demo from "@/assets/demo.png";
 import Link from "next/link";
+import useUserDet from "./_lib/context/userDetailsContext";
 
 export default function Home() {
+  const userDet = useUserDet();
+
   return (
     <div className="flex flex-col min-h-screen items-center justify-center bg-back font-sans relative">
 
@@ -38,7 +41,7 @@ export default function Home() {
 
           <Link 
             title="play"
-            href="/:user?tab=home"
+            href={`/::user::?tab=home`}
             className="w-full max-w-xs bg-brown2 hover:bg-brown3 text-fore font-bold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 md:text-xl text-center cursor-pointer"
           >
             Get Started

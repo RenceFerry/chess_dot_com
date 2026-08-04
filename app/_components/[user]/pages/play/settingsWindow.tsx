@@ -76,13 +76,13 @@ const SettingsWindow = ({ close, settingsState, setSettingsState }: { close: (wi
           {/** chat enabler */}
           <div className='flex flex-row justify-between items-center'>
             <h1>Enable Chat</h1>
-            <Toggler active={settingsState?.chat || false} setActive={chatActivate} />
+            <Toggler name='chatDisable' active={settingsState?.chat || false} onClick={() => chatActivate(!settingsState.chat)} />
           </div>
 
           {/** stream enabler */}
           <div className='flex flex-row justify-between items-center'>
             <h1>Enable Stream</h1>
-            <Toggler active={settingsState?.stream || false} setActive={streamActivate} />
+            <Toggler name='streamGame' active={settingsState?.stream || false} onClick={() => streamActivate(!settingsState.stream)} />
           </div>
 
           {/** private chat enabler */}
@@ -90,7 +90,7 @@ const SettingsWindow = ({ close, settingsState, setSettingsState }: { close: (wi
             'pointer-events-none opacity-50': !settingsState?.stream
           })}>
             <h1>Private Chat</h1>
-            <Toggler active={settingsState?.privateChat || false} setActive={privateChatActivate} />
+            <Toggler name='chatPrivate' active={settingsState?.privateChat || false} onClick={() => privateChatActivate(!settingsState.privateChat)} />
           </div>
         </div>
       </div>

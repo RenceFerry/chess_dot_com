@@ -5,8 +5,9 @@ import logo from '@/assets/demo.png';
 import Image from 'next/image';
 import Board from '@/_components/[user]/pages/board';
 import chessPieces from '@/_lib/chessPieces';
+import { PlayerInfo } from '@/_lib/types';
 
-const WithoutStream = () => {
+const WithoutStream = ({ opponent, isError, isPending }: { opponent: PlayerInfo, isError: boolean, isPending: boolean}) => {
   const boardContainerRef = useRef(null);
 
   const Q = chessPieces['q'];
@@ -15,6 +16,7 @@ const WithoutStream = () => {
 
   return (
     <div className='flex flex-col flex-1 w-full justify-around items-center min-h-0 min-w-0 2xl:flex-row-reverse z-30 gap-2 font-semibold'>
+
       {/* opponent */}
         <div className='flex px-5 flex-row justify-end items-center max-w-full min-w-0 min-h-0 gap-5 self-end 2xl:self-start flex-wrap-reverse 2xl:flex-col-reverse z-10'>
 
@@ -43,8 +45,8 @@ const WithoutStream = () => {
 
             {/** name and elo */}
             <div className='flex flex-row gap-5 items-center'>
-              <h1 className='text-fore1 font-normal text-md md:text-lg truncate max-w-56'>(2345) John Doe tttttttttttttttttttttttttttttttttttttttttteeeeeeeeeeeeeeeeeeeeeeeee</h1>
-              <Image src={logo} alt='profile pic' className='h-12 w-12 rounded-full'/>
+              <h1 className='text-fore1 font-normal text-md md:text-lg truncate max-w-56'>(opponent.elo) {opponent.name}</h1>
+              <Image src={opponent.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} alt='profile pic' className='h-12 w-12 rounded-full'/>
             </div>
           </div>
 
@@ -88,6 +90,8 @@ const WithoutStream = () => {
           </div>
 
         </div>
+
+        
     </div>
   )
 }

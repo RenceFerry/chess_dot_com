@@ -59,7 +59,14 @@ export async function GET(req: NextRequest) {
       create: {
         email,
         name,
-        image
+        image,
+        settings: {
+          create: {
+            streamGame: false,
+            chatDisable: false,
+            chatPrivate: false
+          }
+        }
       },
       select: {
         id: true,
@@ -71,9 +78,9 @@ export async function GET(req: NextRequest) {
   }
 
   const expireAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 );
-  const payload = await encrypt({ userId: dbUser.id, expireAt, name: dbUser.name.replaceAll(' ', '').toLowerCase() });
+  const payload = await encrypt({ userId: dbUser.id, expireAt, name: dbUser.name });
 
-  const response = NextResponse.redirect(new URL('/:user?tab=home', req.nextUrl));
+  const response = NextResponse.redirect(new URL('/::user::?tab=home', req.nextUrl));
 
   response.cookies.set('session', payload,  {
     expires: expireAt,

@@ -33,6 +33,17 @@ model users {
   following  follower[] @relation("following")
   gamePlayer gamePlayer[]
   chats      chat[]
+  settings   settings?
+}
+
+model settings {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @db.Uuid @unique
+  streamGame Boolean  @default(false)
+  chatDisable Boolean @default(false)
+  chatPrivate Boolean @default(false)
+
+  user       users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model shortInfo {

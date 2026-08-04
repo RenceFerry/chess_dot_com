@@ -3,9 +3,7 @@
 import { StreamCardsInfoType } from '@/_lib/types';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
-import logo from '@/assets/demo.png';
 import Button from '@/_components/wrappers/button';
-import { FaChessPawn } from "react-icons/fa6";
 
 const StreamCards = ({ cards }: { cards: StreamCardsInfoType[] }) => {
   const pathname = usePathname();

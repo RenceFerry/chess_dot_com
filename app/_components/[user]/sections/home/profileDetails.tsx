@@ -1,6 +1,5 @@
 'use client';
 
-import demo from '@/assets/demo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/_components/wrappers/button';
@@ -8,8 +7,11 @@ import { ProfileDetSkeleton } from '@/_components/skeletons';
 import { useQuery } from '@tanstack/react-query';
 import { getUserStat } from '@/_utils/serverActions/fetchActions';
 import { formatFollowers } from '@/_utils/helpers';
+import useUserDet from '@/_lib/context/userDetailsContext';
 
 const ProfileDetails = () => {
+  const userDet = useUserDet();
+
   const { data: userStat, isError, isPending } = useQuery({
     queryKey: ['userStat'],
     queryFn: async () => {
@@ -20,7 +22,7 @@ const ProfileDetails = () => {
       }
       return data;
     },
-    staleTime: 3 * 60 * 1000,
+    staleTime: 1000 * 60,
     retry: false
   });
 
@@ -36,17 +38,19 @@ const ProfileDetails = () => {
     return <>failed to fetch user stat</>
   }
 
+  console.log(userDet.image);
+
   return (
     <>
       {/** profile pic */}
       <div className='h-34 w-34 sm:w-64 sm:h-64 md:h-84 md:w-84 rounded-full object-cover overflow-hidden relative'>
-        <Image fill alt='profile picture' src={userStat?.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} className='object-cover w-full h-full bg-back2' />
+        <Image unoptimized={true} fill alt='profile picture' src={userDet?.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} className='object-cover w-full h-full bg-back2' />
       </div>
 
       {/** user details */}
       <div className='flex flex-col items-center justify-center gap-2 md:h-full p-4'>
 
-        <h1 className='text-brown1 text-lg font-semibold md:text-3xl'>{userStat?.name.split(' ')[0]} ({userStat.elo})</h1>
+        <h1 className='text-brown1 text-lg font-semibold md:text-3xl'>{userDet?.name.split(' ')[0]} ({userDet.elo})</h1>
 
         <Button bgspan='fore/40' className='w-fit h-fit p-2 hover:bg-back2'>
           <Link href={'/user/followers'} className='w-full h-full text-fore1 text-sm md:text-xl font-semibold'>

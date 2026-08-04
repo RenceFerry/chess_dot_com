@@ -29,3 +29,7 @@ export const insertSort = <T>(arr: T[], item: T, compareFn: (a: T, b: T) => numb
   arr.splice(lo, 0, item);
   return arr;
 }
+
+export const getFirstName = (name: string) => {
+  return name.split(' ')[0].split('_')[0].split('.')[0];
+}

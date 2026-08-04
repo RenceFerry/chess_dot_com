@@ -11,12 +11,7 @@ const privateRoutes = new RegExp(
   '^' +
   '(?<user>\\/[^/?]+)' +                                // /user
   '(' +
-    '\\/' + '(?<path1>play)' +                   // /play or /stream
-    '\\?' +                                             // ?
-    '(?=.*id=(?<uuid>' + uuid + '))' +      // lookahead: id=uui(order-independent)  
-    '[^#]*' +                                           // consume query string
-  '|' +
-    '\\/' + '(?<path2>followers|settings|stream)[^#]*'  +            // /followers or /settings or /stream with query strings
+     '\\/(?<path2>followers|settings|stream|play)(?:\\?[^#]*)?'  +            // /followers or /settings or /stream with query strings
   '|' +
     '(?<usertab>\\?tab=(?:play|home|more|streams))' +   // ?tab=...
   ')?' +                          // whole suffix is optional (matches bare /user)
@@ -31,48 +26,20 @@ export default async function proxy(req: NextRequest)
   const path = req.nextUrl.pathname;
   
   console.log(path);
-  let wholePath = req.nextUrl.pathname;
-  if (req.nextUrl.searchParams.toString()) wholePath += ('?' + req.nextUrl.searchParams.toString());
+  // let wholePath = req.nextUrl.pathname;
+  // if (req.nextUrl.searchParams.toString()) wholePath += ('?' + req.nextUrl.searchParams.toString());
+  const wholePath = req.nextUrl.pathname + req.nextUrl.search;
 
   const session = (await cookies()).get('session')?.value;
   const decrypted = await decrypt(session);
   const urlUser = path.split('/')[1];
-  const afterPath = wholePath.split('?')[1] || 'tab=home';
+  //const afterPath = wholePath.split('?')[1] || 'tab=home';
 
-  const name = decrypted?.name as string;
+  const name = decrypted?.name ? (decrypted.name as string).replaceAll(' ', ''): '';
+ 
+  console.log('test',wholePath, privateRoutes.test(wholePath), urlUser);
 
-  console.log(wholePath, privateRoutes.test(wholePath));
-
-  if (
-    privateRoutes.test(wholePath) ||
-
-    //test /user && /user/
-    ( decrypted &&
-    urlUser.toLowerCase() === name.toLowerCase() &&
-    (path.split('/').length === 2 ||
-    (path.split('/').length === 3 && path.split('/')[2] === ''
-    )))
-  )
-  {
-    console.log('hello private')
-
-    if (decrypted && urlUser !== name)
-    {
-      if (!(path.split('/')[2] === undefined || path.split('/')[2] === '')) {
-        return NextResponse.redirect(new URL(`/${name}/${path.split('/')[2]}`, req.nextUrl));
-      }
-      return NextResponse.redirect(new URL(`/${name}?${afterPath}`, req.nextUrl));
-    }
-
-    if (!decrypted)
-    {
-      console.log('redirecting to login');
-      return NextResponse.redirect(new URL('/login', req.nextUrl));
-    }
-
-    return NextResponse.next();
-  } 
-
+  // partial routes
   if (partialRoutes.includes(path)) 
   {
     console.log('hello partial')
@@ -84,18 +51,53 @@ export default async function proxy(req: NextRequest)
     }
   }
 
+  // private routes
+  if (
+    privateRoutes.test(wholePath) //||
+    //test /user && /user/
+    // ( decrypted &&
+    // urlUser.toLowerCase() === name.toLowerCase() &&
+    // (path.split('/').length === 2 ||
+    // (path.split('/').length === 3 && path.split('/')[2] === ''
+    // )))
+  )
+  {
+    console.log('hello private')
+    if (!decrypted)
+    {
+      console.log('redirecting to login');
+      return NextResponse.redirect(new URL('/login', req.nextUrl));
+    }
+
+    if (urlUser === '::user::') {
+      return NextResponse.redirect(new URL(`/${name}`, req.url));
+    }
+
+    if (urlUser.toLowerCase() !== name.toLowerCase())
+    {
+      return NextResponse.redirect(new URL(`/notFound?url=${req.url}`, req.url));
+      // if (!(path.split('/')[2] === undefined || path.split('/')[2] === '')) {
+      //   return NextResponse.redirect(new URL(`/${name}/${path.split('/')[2]}`, req.nextUrl));
+      // }
+      // return NextResponse.redirect(new URL(`/${name}?${afterPath}`, req.nextUrl));
+    }
+
+    return NextResponse.next();
+  } 
+
+  // public routes
   if (publicRoutes.includes(path)) {
     console.log("hello public")
     return NextResponse.next();
   }
 
   if (path !== '/notFound') {
-    return NextResponse.redirect(new URL(`/notFound?url=${req.nextUrl.basePath + wholePath}`, req.nextUrl));
+    return NextResponse.redirect(new URL(`/notFound?url=${req.url}`, req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
 }

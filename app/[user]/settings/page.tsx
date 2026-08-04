@@ -5,22 +5,73 @@ import { IoArrowBackSharp } from 'react-icons/io5';
 import { usePathname, useRouter } from 'next/navigation';
 import Button from '@/_components/wrappers/button';
 import Toggler from '@/_components/toggler';
-import { useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import ChangePassword from '@/_components/[user]/pages/settings/changePassword';
+import useUserDet from '@/_lib/context/userDetailsContext';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { upDateSettings } from '@/_utils/serverActions/postActions';
+import { UserInfo, SettingsType } from '@/_lib/types';
 
 const Page = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const [ active, setActive ] = useState(false);
+  //const [ active, setActive ] = useState(false);
   const [ showPasswordChange, setShowPasswordChange ] = useState(false);
+  const { settings } = useUserDet();
+  const queryClient = useQueryClient();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // handle back clicking
-  function handleBack() 
-  {
+  // mutation
+  const mutation = useMutation({
+    mutationFn: async (setting: SettingsType) => {
+      const data = await upDateSettings(setting);
+      if (!data) throw new Error();
+
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log('mutation success', data);
+      queryClient.setQueryData(['userDetails'], (oldData: UserInfo) => {
+        return {
+          ...oldData,
+          settings: { ...data },
+        }
+      })
+    }
+  })
+
+  // handle back clicking)
+  const handleBack = useCallback(() => {
     const param = new URLSearchParams();
     param.set('tab', 'more');
     router.replace(`/${pathname.split('/')[1]}?${param.toString()}`);
-  }
+  }, [pathname, router])
+
+  // handle save settings
+  const formChange = useCallback((e: ChangeEvent<HTMLFormElement>) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    const formData = new FormData(e.currentTarget);
+
+    timeoutRef.current = setTimeout(() => {
+      const set =  {
+        chatDisable: formData.has('chatDisable'),
+        chatPrivate: formData.has('chatPrivate'),
+        streamGame: formData.has('streamGame'),
+      };
+      console.log(set);
+      mutation.mutate(set);
+    }, 1000)
+  }, [mutation])
+
+  // setSettings
+  useEffect(() => {
+    if (!settings) {
+      queryClient.invalidateQueries({ queryKey: ['userDetails'] });
+    }
+  }, [settings, queryClient]);
+
+  console.log(settings);
+
   return (
     <div className='w-full h-full min-h-0 min-w-0 flex flex-col bg-back4 rounded-t-3xl relative overflow-hidden'>
       
@@ -52,7 +103,7 @@ const Page = () => {
         </div>
 
         {/** preferences */}
-        <div className='w-full max-w-150 flex flex-col'>
+        <form onChange={formChange} className='w-full max-w-150 flex flex-col'>
 
           {/** label */}
           <h1 className='text-brown2 text-sm md:text-mds'>Preference</h1>
@@ -61,21 +112,22 @@ const Page = () => {
           <div className='w-full flex flex-row justify-between items-center p-2 hover:bg-back3 text-fore1.s'>
             <h1>Set streaming as default when playing</h1>
 
-            <Toggler active={active} setActive={setActive} />
+            <Toggler name='streamGame' active={settings?.streamGame || false} />
           </div>
 
           <div className='w-full flex flex-row justify-between items-center p-2 hover:bg-back3 text-fore1.s'>
             <h1>Disable chat when playing</h1>
 
-            <Toggler active={active} setActive={setActive} />
+            <Toggler name='chatDisable' active={settings?.chatDisable || false} />
           </div>
 
           <div className='w-full flex flex-row justify-between items-center p-2 hover:bg-back3 text-fore1.s'>
-            <h1>Make chats private when streaming</h1>
+            <h1>Make chats private when streaming default</h1>
 
-            <Toggler active={active} setActive={setActive} />
+            <Toggler name='chatPrivate' active={settings?.chatPrivate || false} />
           </div>
-        </div>
+
+        </form>
       </main>
 
       { // change password card

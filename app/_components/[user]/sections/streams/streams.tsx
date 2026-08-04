@@ -68,7 +68,7 @@ const Streams = () => {
     // observer
     const observer = new IntersectionObserver(async ([ent]) => {
       console.log(!isPending, !isFetching, !nomoreRef.current)
-      if (ent.isIntersecting && !isPending && !isFetching && !nomoreRef.current) {
+      if (ent.isIntersecting && !isPending && !isFetching && !nomoreRef.current && !isFetchingMore) {
         await reFetch();
       }
     },{
@@ -84,7 +84,7 @@ const Streams = () => {
     return () => {
       observer.disconnect();
     }
-  }, [queryClient, search, streams, isPending, isFetching]);
+  }, [queryClient, search, streams, isPending, isFetching, isFetchingMore]);
 
     // handle search change
   function handleInput(search: string) {

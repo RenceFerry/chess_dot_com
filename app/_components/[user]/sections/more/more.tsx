@@ -10,9 +10,11 @@ import { MdOutlineSettings } from "react-icons/md";
 import AccountWindow from './account';
 import Button from '@/_components/wrappers/button';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const More = () => {
   const [ accountWindowHidden, setAccountWindowHidden ] = useState<boolean>(true);
+  const pathname = usePathname();
 
   return (
     <div className='h-full w-full flex flex-row justify-start items-start text-fore1 font-semibold relative'>
@@ -33,7 +35,7 @@ const More = () => {
 
           {/** followers */}
           <Button bgspan='fore/10' className='cursor-pointer w-full h-10'>
-            <Link href='/user/followers' className='w-full h-full flex px-2 items-center flex-row hover:bg-back2 gap-5'>
+            <Link href={`${pathname}/followers`} className='w-full h-full flex px-2 items-center flex-row hover:bg-back2 gap-5'>
               <GiShadowFollower className='text-2xl text-brown2' />
               <h1>Followers / Following</h1>
             </Link>
@@ -67,7 +69,7 @@ const More = () => {
 
           {/** settings */}
           <Button bgspan='fore/10' className='cursor-pointer w-full h-10'>
-            <Link href='/user/settings' className='flex px-2 items-center flex-row hover:bg-back2 gap-5 w-full h-full'>
+            <Link href={`${pathname}/settings`} className='flex px-2 items-center flex-row hover:bg-back2 gap-5 w-full h-full'>
               <MdOutlineSettings className='text-2xl text-brown2' />
               <h1>Settings</h1>
             </Link>

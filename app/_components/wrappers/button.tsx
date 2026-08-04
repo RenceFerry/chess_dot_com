@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 type ButtonProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   bgspan?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
