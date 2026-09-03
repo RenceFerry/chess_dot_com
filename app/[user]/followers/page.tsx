@@ -162,6 +162,7 @@ const Page = () => {
     param.set('tab', 'more');
     router.replace(`/${pathname.split('/')[1]}?${param.toString()}`);
   }
+  
   return (
     <div className='w-full h-full min-h-0 min-w-0 flex flex-col bg-back4 rounded-t-3xl relative' ref={divConObsRef}>
       

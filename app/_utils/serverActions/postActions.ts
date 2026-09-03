@@ -70,7 +70,7 @@ export const updateUserDet = async (formData: FormData): Promise<{
     // upload file if exist and get url
     let url: string | null = null;
     if (infoData.file instanceof File) {
-      const filePath = decryted.userId + '/' + infoData.file.name;
+      const filePath = decryted.userId;
   
       const { error } = await supabase.storage
         .from('avatar')
@@ -80,26 +80,28 @@ export const updateUserDet = async (formData: FormData): Promise<{
       if (error) throw new Error('cannot upload file');
 
       const resUrl = supabase.storage.from('avatar').getPublicUrl(filePath);
-      url = resUrl.data.publicUrl;
+      const queryParam = new URLSearchParams();
+      queryParam.set('date', String(Date.now()));
+      url = resUrl.data.publicUrl + `?${queryParam.toString()}`;
+
+      console.log(url);
     }
 
     // store user informations
-    let resData = { id: decryted.userId, name: decryted.name };
-    if (decryted.name !== infoData.name) {
-      resData = await prisma.users.update({
-        where: {
-          id: decryted.userId
-        }, 
-        data: {
-          name: infoData.name.trim(),
-          ...(url ? { image: url }: {})
-        },
-        select: {
-          name: true,
-          id: true
-        }
-      })
-    }
+    const resData = await prisma.users.update({
+      where: {
+        id: decryted.userId
+      }, 
+      data: {
+        name: infoData.name.trim(),
+        ...(url ? { image: url }: {})
+      },
+      select: {
+        name: true,
+        id: true
+      }
+    })
+    
 
     await createSession(resData.id, resData.name);
 

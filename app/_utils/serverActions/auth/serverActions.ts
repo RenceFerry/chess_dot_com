@@ -6,7 +6,7 @@ import type { StateAuthForm } from '../../../_lib/types';
 import bcrypt from 'bcrypt';
 import prisma from '@/_lib/prisma';
 import { createSession } from '../../sessions';
-import transporter from '@/_lib/brevo';
+import redis from '@/_lib/redis';
 import { generateOTP } from '@/_utils/helpers';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -14,6 +14,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import gender from '@/_lib/genderApi';
+import resend from '@/_lib/resend';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const otpHTMLTemplateFilepath = path.join(__dirname, '../../../_lib/otp-email.html')
@@ -120,8 +121,8 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
     }
   }
 
-  const email = validatedData.data.email.trim();
-  const name = validatedData.data.username.trim();
+  const email = validatedData.data.email.trim().toLowerCase();
+  const name = validatedData.data.username.trim().toLowerCase();
   const formPassword = validatedData.data.password.trim();
   
   //check if user already exist
@@ -139,14 +140,14 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
     console.log('user?', user)
 
     if (user) {
-      if (user.name === name && user.email === email) {
+      if (user.name.toLowerCase() === name && user.email.toLowerCase() === email) {
         return {
           message: 'Account already exist sign in instead',
           payload: {
             ...data
           }
         }
-      } else if (user.name === name) {
+      } else if (user.name.toLowerCase() === name) {
         return {
           error: {
             errors: [],
@@ -160,7 +161,7 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
             ...data
           }
         }
-      } else if (user.email === email) {
+      } else if (user.email.toLowerCase() === email) {
         return {
           error: {
             errors: [],
@@ -203,28 +204,41 @@ export const signupSA = async (initialState: StateAuthForm, formData: FormData):
       .replaceAll('{{YourApp}}', 'ChessDotCom')
       .replace('{{Expire}}', '5');
 
-    await transporter.sendMail({
-      from: '"ChessDotCom" <rence.ferry.dev@gmail.com>',
+    // await transporter.sendMail({
+    //   from: '"ChessDotCom" <rence.ferry.dev@gmail.com>',
+    //   to: email,
+    //   subject: 'Verify your email with OTP',
+    //   html: html
+    // })
+
+    // store otp
+    // await prisma.shortInfo.upsert({
+    //   where: {
+    //     email: email
+    //   },
+    //   update: {
+    //     info,
+    //     ex: new Date(Date.now() + 1000 * 60 * 5)
+    //   },
+    //   create: {
+    //     email,
+    //     info,
+    //     ex: new Date(Date.now() + 1000 * 60 * 5)
+    //   }
+    // })
+
+    // send otp to email
+    const { error } = await resend.emails.send({
+      from: 'ChessDotCom <chessdotcom@clarenceferry.com>',
       to: email,
-      subject: 'Verify your email with OTP',
+      subject: "Don't Share Your OTP",
       html: html
     })
 
-    // store otp
-    await prisma.shortInfo.upsert({
-      where: {
-        email: email
-      },
-      update: {
-        info,
-        ex: new Date(Date.now() + 1000 * 60 * 5)
-      },
-      create: {
-        email,
-        info,
-        ex: new Date(Date.now() + 1000 * 60 * 5)
-      }
-    })
+    if (error) throw error;
+
+    // store otp in redis
+    await redis.set(email, info, { expiration: { type: 'EX', value: 5 * 60 } })
 
   } catch (e) {
     console.error(e);
@@ -265,14 +279,10 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
     code: 1
   }
   
-  // get otp from db
+  // get otp from redis
   let res;
   try {
-    res = await prisma.shortInfo.findUnique({
-      where: {
-        email
-      }
-    });
+    res = await redis.get(email);
 
   } catch(e) {
     console.error(e);
@@ -285,19 +295,12 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
   if (!res)
   {
     return {
-      message: 'OTP does not exist, please sign up again or request new OTP',
+      message: 'OTP expired, please sign up again or request new OTP',
       code: 1
     }
   }
 
-  if (res.ex < new Date()) {
-    return {
-      message: 'OTP expired, please sign up again or request a new OTP',
-      code: 1
-    }
-  }
-
-  const {name, password, otp: resOtp } = res.info ? JSON.parse(res.info) : {name: '', password: '', otp: 0};
+  const {name, password, otp: resOtp } = res ? JSON.parse(res) : {name: '', password: '', otp: 0};
   console.log(otp);
 
   if (resOtp !== parseInt(otp)) {
@@ -307,19 +310,8 @@ export async function verifyEmailSA(initialState: StateAuthForm, formData: FormD
     }
   }
 
-  try {
-    await prisma.shortInfo.delete({
-      where: {
-        email
-      }
-    })
-  } catch (e) {
-    console.error(e);
-    return {
-      message: 'Server error, try again later',
-      code: 1
-    }
-  }
+  // delete otp
+  await redis.del(email);
 
   // generate avatar and create user
   const sex = (await gender.getByFullName(name)).gender || 'unknown';

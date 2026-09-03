@@ -9,6 +9,7 @@ import { jwtVerify } from 'jose';
 import initializeEvents from '@/_utils/serverSocketEvents/events';
 import { streams } from '@/_lib/test';
 import { insertSort } from '@/_utils/helpers';
+import redis from '@/_lib/redis';
 
 const port = Number(process.env.PORT) || 3000;
 const secretKey = process.env.SESSION_SECRET;
@@ -18,7 +19,7 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
   const server = createServer((req, res) => {
     const parseUrl = parse(req.url!, true);
     handle(req, res, parseUrl);
@@ -28,26 +29,46 @@ app.prepare().then(() => {
   // user status for holding sockets, online etc
   const userStatus = new Map<string, PlayersMapObjectType>();
   // for streams
-  const streamsInfos = new Map<string, StreamCardsInfoType>();
-  const streamsKeys = new Array<string>();
+  // const streamsInfos = new Map<string, StreamCardsInfoType>();
+  // const streamsKeys = new Array<string>();
   // for invitations
   const invitations = new Map<string, InvitationStateType>();
 
   // temporarily populate streams data
-  streams.forEach((stream) => {
-    const key = stream.p1 + '::' + stream.p2 + '::' + stream.no;
-    streamsInfos.set(key, {
-      no: stream.no,
-      p1Elo: stream.p1Elo,
-      p2Elo: stream.p2Elo,
-      p1Name: stream.p1,
-      p2Name: stream.p2,
-      mode: 'Blitz',
-      p1Img: null,
-      p2Img: null
-    })
-    insertSort(streamsKeys, key, (a, b) => a.localeCompare(b, undefined, { numeric: true}))
-  })
+  // streams.forEach((stream) => {
+  //   const key = stream.p1 + '::' + stream.p2 + '::' + stream.no;
+  //   streamsInfos.set(key, {
+  //     no: stream.no,
+  //     p1Elo: stream.p1Elo,
+  //     p2Elo: stream.p2Elo,
+  //     p1Name: stream.p1,
+  //     p2Name: stream.p2,
+  //     mode: 'Blitz',
+  //     p1Img: null,
+  //     p2Img: null
+  //   })
+  //   insertSort(streamsKeys, key, (a, b) => a.localeCompare(b, undefined, { numeric: true}))
+  // })
+
+  // temporarily populate redis streams
+  try {
+    streams.forEach(async (stream) => {
+      const key = stream.p1 < stream.p2 ? stream.p1 + '::' + stream.p2 + '::' + stream.no : stream.p2 + '::' + stream.p1 + '::' + stream.no ;
+      await redis.json.set('streams', `$["${key}"]`, {
+        no: stream.no,
+        p1Elo: stream.p1Elo,
+        p2Elo: stream.p2Elo,
+        p1Name: stream.p1,
+        p2Name: stream.p2,
+        mode: 'Blitz',
+        p1Img: null,
+        p2Img: null
+      })
+      await redis.zAdd('streams::keys', { score: Date.now() + 1000 * 60 * 60 * 24, value: key})
+    }) 
+  } catch (e) {
+    console.error(e);
+  }
 
   // initialize socket.io server
   const io = new Server(server, {
@@ -138,25 +159,25 @@ app.prepare().then(() => {
 
   global.io = io;
   global.userStatus = userStatus;
-  global.streamsInfos = streamsInfos;
-  global.streamsKeys = streamsKeys;
+  // global.streamsInfos = streamsInfos;
+  // global.streamsKeys = streamsKeys;
   global.invitations = invitations;
 
   // for deleting stale temp data
-  const int = setInterval(() => {
-    // delete expired invitations
-    for (const [key, val] of invitations) {
-      for (const [key1, val1] of val.map) {
-        if (val1.ex < Date.now()) {
-          val.map.delete(key1);
-          val.keys = val.keys.filter(k => k !== key1);
-        }
-      }
-      if (val.map.size === 0) {
-        invitations.delete(key);
-      }
-    }
-  }, 1000 * 60 * 5)
+  // const int = setInterval(() => {
+  //   // delete expired invitations
+  //   for (const [key, val] of invitations) {
+  //     for (const [key1, val1] of val.map) {
+  //       if (val1.ex < Date.now()) {
+  //         val.map.delete(key1);
+  //         val.keys = val.keys.filter(k => k !== key1);
+  //       }
+  //     }
+  //     if (val.map.size === 0) {
+  //       invitations.delete(key);
+  //     }
+  //   }
+  // }, 1000 * 60 * 5)
 
   server.listen(port, '0.0.0.0', () => {
     console.log(">> Ready on port " + port);

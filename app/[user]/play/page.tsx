@@ -43,7 +43,7 @@ const Page = () => {
   });
 
   // get opponents info
-  const { data, error, isPending } = useQuery({
+  const { data, isError, isPending } = useQuery({
     queryKey: ['getPlayer', opponent],
     queryFn: async () => {
       const { data, error } = await getPlayerInfo(opponent || '');
@@ -130,9 +130,12 @@ const Page = () => {
         opponent && uuidRegex.test(opponent) ?
           <main className='flex flex-1 flex-col items-center w-full min-h-0 min-w-0 relative'>
 
-            { isStream ?
+            {
+              data && (
+              isStream ?
               <WithStream /> :
               <WithoutStream opponent={data} isPending={isPending} isError={isError} />
+              )            
             }
 
             {/** chat input and controls */}

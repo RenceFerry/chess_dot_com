@@ -6,8 +6,10 @@ import Image from 'next/image';
 import Board from '@/_components/[user]/pages/board';
 import chessPieces from '@/_lib/chessPieces';
 import { PlayerInfo } from '@/_lib/types';
+import useUserDet from '@/_lib/context/userDetailsContext';
 
 const WithoutStream = ({ opponent, isError, isPending }: { opponent: PlayerInfo, isError: boolean, isPending: boolean}) => {
+  const userDet = useUserDet();
   const boardContainerRef = useRef(null);
 
   const Q = chessPieces['q'];
@@ -45,8 +47,8 @@ const WithoutStream = ({ opponent, isError, isPending }: { opponent: PlayerInfo,
 
             {/** name and elo */}
             <div className='flex flex-row gap-5 items-center'>
-              <h1 className='text-fore1 font-normal text-md md:text-lg truncate max-w-56'>(opponent.elo) {opponent.name}</h1>
-              <Image src={opponent.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} alt='profile pic' className='h-12 w-12 rounded-full'/>
+              <h1 className='text-fore1 font-normal text-md md:text-lg truncate max-w-56'>({opponent.elo}) {opponent.name}</h1>
+              <Image width={72} height={72} src={opponent.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} alt='profile pic' className='h-12 w-12 rounded-full'/>
             </div>
           </div>
 
@@ -63,8 +65,8 @@ const WithoutStream = ({ opponent, isError, isPending }: { opponent: PlayerInfo,
           <div className='flex flex-row justify-start items-center min-h-0 gap-10'>
             {/** name and elo */}
             <div className='flex flex-row items-center gap-5'>
-              <Image src={logo} alt='profile pic' className='h-12 w-12 rounded-full'/>
-              <h1 className='text-fore1 font-normal truncate max-w-56'>(2345) John Woodsssssssssssssssssssssssssssssssssssssssssss</h1>
+              <Image width={72} height={72} unoptimized src={userDet.image || 'https://khqlrecfncqrctilbjwx.supabase.co/storage/v1/object/public/avatar/no_profile%20(1).jpg'} alt='profile pic' className='h-12 w-12 rounded-full'/>
+              <h1 className='text-fore1 font-normal truncate max-w-56'>({userDet.elo}) {userDet.name}</h1>
             </div>
 
             {/** time */}

@@ -388,7 +388,7 @@ const ImageCropper = ({ imgSrc, setImgSrc, setProccessing, file }: {
         return setImgSrc(null);
       }
 
-      file.current = new File([blob], `avatar?=${Date.now()}.png`, {
+      file.current = new File([blob], `${Date.now()}.png`, {
         type: blob.type,
         lastModified: Date.now(),
       })

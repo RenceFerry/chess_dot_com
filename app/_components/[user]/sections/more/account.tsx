@@ -58,7 +58,9 @@ const AccountWindow = ({ close }: { close: () => void }) => {
 
     setPayloadError(null);
 
-    queryClient.invalidateQueries({ queryKey: ['userDetails'] });
+    queryClient.setQueryData(['userDetails'] , (prev: UserInfo): UserInfo => {
+      return {...prev, image: data.image}
+    });
 
     notif?.setNotif({
       message: 'User details successfully updated',
