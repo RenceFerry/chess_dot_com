@@ -42,7 +42,7 @@ const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
           {/** title & close button */}
           <div className='w-full flex flex-row p-3 justify-end'>
             {/** close button */}
-            <Button bgspan='fore/20' onClick={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+            <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
               <IoClose className='text-fore2 text-xl' />
             </Button>
           </div>
@@ -110,7 +110,7 @@ const ProfileCard = ({ close, id }: { close: () => void, id: string } ) => {
               <div className='flex flex-col items-center gap-2 w-full mt-3'>
                 
                 {/** invite button */}
-                <Button title="You can still invite players even though they're playing, they can accept it and play in other tab" onClick={() => setShowInviteCard(true)} bgspan='fore/40' className='bg-green2 text-back3 font-semibold p-2 w-[70%] min-w-64 max-w-80 rounded-xl hover:bg-green3 truncate'>
+                <Button title="You can still invite players even though they're playing, they can accept it and play in other tab" click={() => setShowInviteCard(true)} bgspan='fore/40' className='bg-green2 text-back3 font-semibold p-2 w-[70%] min-w-64 max-w-80 rounded-xl hover:bg-green3 truncate'>
                   Invite {player.name.split(' ')[0]}
                 </Button>
 

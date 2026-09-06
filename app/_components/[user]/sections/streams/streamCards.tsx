@@ -20,7 +20,7 @@ const StreamCards = ({ cards }: { cards: StreamCardsInfoType[] }) => {
     <>
       {
         cards.map((card: StreamCardsInfoType, i: number) => (
-          <Button bgspan='fore/20' onClick={() => watchStream(card)} key={i} className='flex mx-auto w-[90%] max-w-200 h-80 rounded-xl flex-col bg-back2 overflow-hidden transition duration-150 hover:scale-103 ease-in-out transform cursor-pointer hover:brightness-125 relative'>
+          <Button bgspan='fore/20' click={() => watchStream(card)} key={i} className='flex mx-auto w-[90%] max-w-200 h-80 rounded-xl flex-col bg-back2 overflow-hidden transition duration-150 hover:scale-103 ease-in-out transform cursor-pointer hover:brightness-125 relative'>
 
             {/** stream number identifier */
               card.no > 0 &&

@@ -28,7 +28,7 @@ const ChatWindow = ({ close }: { close: (win: 'chats' | 'moves') => void }) => {
           Chats
         </h1>
 
-        <Button bgspan='fore/20' onClick={() => close('chats')} title='close chat window' type='button' className='p-2 rounded-full hover:bg-back1 cursor-pointer'>
+        <Button bgspan='fore/20' click={() => close('chats')} title='close chat window' type='button' className='p-2 rounded-full hover:bg-back1 cursor-pointer'>
           <IoClose className='text-fore2 text-xl' />
         </Button>
       </div>

@@ -4,7 +4,7 @@ import useUserDet from "@/_lib/context/userDetailsContext";
 import Button from "./wrappers/button";
 import { getFirstName } from "@/_utils/helpers";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { getPlayerInfo } from "@/_utils/serverActions/fetchActions";
 import { useCallback, useState } from "react";
 import useSocket from "@/_lib/hooks/useSocket";
@@ -12,12 +12,14 @@ import { useNotif } from "@/_lib/context/notifContext";
 import { ShowInvitationCardContextType } from "@/_lib/types";
 import { FaChessPawn } from "react-icons/fa";
 import clsx from "clsx";
+import { IoClose } from "react-icons/io5";
 
 const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvitationCardContextType }) => {
   const userInfo = useUserDet();
   const socket = useSocket();
   const notif = useNotif();
   const [ waiting, setWaiting ] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data, isPending, isError } = useQuery({
     queryKey: ['getPlayer', showInvitationCard?.showInvitationCard?.fromId],
@@ -36,6 +38,9 @@ const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvita
 
   // reject
   const handleReject = useCallback(() => {
+    // update invites list
+    queryClient.invalidateQueries({ queryKey: ['get_invitations'], refetchType: 'all' });
+
     socket.emit('invitation:reject', {
       fromId: showInvitationCard?.showInvitationCard?.fromId,
       fromName: showInvitationCard?.showInvitationCard?.fromName,
@@ -45,7 +50,7 @@ const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvita
     })
 
     close();
-  }, [socket, userInfo, showInvitationCard, close]);
+  }, [socket, userInfo, showInvitationCard, close, queryClient]);
   
   // accept
   const handleAccept = useCallback(() => {
@@ -95,7 +100,6 @@ const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvita
       fromId: showInvitationCard?.showInvitationCard?.fromId,
       fromName: showInvitationCard?.showInvitationCard?.fromName,
       data: { ...showInvitationCard?.showInvitationCard?.data },
-      toUserId: showInvitationCard?.showInvitationCard?.fromId
     })
 
     close();
@@ -108,7 +112,14 @@ const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvita
         <div className="h-full w-full absolute center top-0 left-0 z-1001 bg-black/60 backdrop-blur-xs">
 
           {/** the actual card */}
-          <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-80 w-[90%] md:w-65/100 max-w-150'>
+          <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-80 w-[90%] md:w-65/100 max-w-150 overflow-clip'>
+
+            {/** top layer with close button */}
+            <div className="w-full flex flex-row justify-end p-2">
+              <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+                <IoClose className='text-fore2 text-xl' />
+              </Button>
+            </div>
 
             {
               isError ?
@@ -189,12 +200,12 @@ const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvita
                       <div className='h-10 w-3/4 min-w-20 px-3 text-back4 font-semibold flex flex-row gap-5 items-center justify-center' >
 
                         {/** reject */}
-                        <Button className="h-full w-1/3 bg-error1 text-back4 hover:bg-error2 center rounded-lg" onClick={handleReject}>
+                        <Button className="h-full w-1/3 bg-error1 text-back4 hover:bg-error2 center rounded-lg" click={handleReject}>
                           Reject
                         </Button>
 
                         {/** accept */}
-                        <Button className="h-full w-1/3 bg-green2 text-back4 hover:bg-green3 center rounded-lg" onClick={handleAccept}>
+                        <Button className="h-full w-1/3 bg-green2 text-back4 hover:bg-green3 center rounded-lg" click={handleAccept}>
                           Accept
                         </Button>
 
@@ -300,7 +311,7 @@ const InvitationCard = ({ showInvitationCard }: { showInvitationCard: ShowInvita
                 <div className='h-10 w-1/2 min-w-20 px-3 text-back4 font-semibold flex flex-row gap-5 items-center justify-center' >
 
                   {/** cancel */}
-                  <Button className="h-full w-full bg-error1 text-back4 hover:bg-error2 center rounded-lg" onClick={handleCancel}>
+                  <Button className="h-full w-full bg-error1 text-back4 hover:bg-error2 center rounded-lg" click={handleCancel}>
                     Cancel
                   </Button>
 

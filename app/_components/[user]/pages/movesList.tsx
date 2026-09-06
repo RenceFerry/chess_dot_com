@@ -25,7 +25,7 @@ const MovesList = ({ close }: { close: (win: 'chats' | 'moves') => void }) => {
         {/** title */}
         <h1 className='text-lg font-semibold text-brown1 ml-3'>Moves List</h1>
 
-        <Button bgspan='fore/20' onClick={() => close('moves')} title='close moves list' type='button' className='p-2 rounded-full hover:bg-back1 cursor-pointer'>
+        <Button bgspan='fore/20' click={() => close('moves')} title='close moves list' type='button' className='p-2 rounded-full hover:bg-back1 cursor-pointer'>
           <IoClose className='text-fore2 text-xl' />
         </Button>
       </div>

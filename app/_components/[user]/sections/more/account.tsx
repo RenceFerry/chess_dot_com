@@ -87,7 +87,7 @@ const AccountWindow = ({ close }: { close: () => void }) => {
             <h1 className='text-lg text-brown1'>Account details</h1>
 
             {/** close button */}
-            <Button bgspan='fore/20' onClick={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+            <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
               <IoClose className='text-fore2 text-xl' />
             </Button>
           </div>
@@ -103,7 +103,7 @@ const AccountWindow = ({ close }: { close: () => void }) => {
                 <div className='w-[25%] aspect-square absolute bottom-[5%] right-[5%] z-3 bg-back rounded-full hover:bg-back3'>
                   <Button bgspan='fore/20' className='w-full h-full grid items-center rounded-full'>
 
-                    <RiEdit2Line className='text-lg md:text-4xl m-auto' />
+                    <RiEdit2Line className='text-xl md:text-4xl m-auto' />
 
                     <input disabled={processing} onChange={(e) => handleFile(e.target.files?.[0])} ref={inputFileRef} type='file' title='change avatar' accept='image/*' className='absolute top-0 left-0 z-3 opacity-0 cursor-pointer w-full h-full' />
                   </Button>
@@ -155,7 +155,7 @@ const AccountWindow = ({ close }: { close: () => void }) => {
                 <div className='flex justify-around flex-row w-full mt-4'>
 
                   {/** cancel */}
-                  <Button bgspan='back4/20' title='cancel' type='button' onClick={close} className='bg-error1 text-sm md:text-lg text-back3 rounded-md w-26 py-2 cursor-pointer flex flex-row justify-center items-center gap-1'>
+                  <Button bgspan='back4/20' title='cancel' type='button' click={close} className='bg-error1 text-sm md:text-lg text-back3 rounded-md w-26 py-2 cursor-pointer flex flex-row justify-center items-center gap-1'>
                     <IoClose />
                     <h1>Cancel</h1>
                   </Button>
@@ -176,7 +176,7 @@ const AccountWindow = ({ close }: { close: () => void }) => {
 
                 </div> :
                 <div className='flex justify-end flex-row w-full mt-4'>
-                  <Button bgspan='fore/20' onClick={() => setEditAccount(true)} type='button' title='edit' className='p-2 hover:bg-brown2 bg-brown3 text-fore1 rounded-full text-2xl md:p-3 md:text-3xl cursor-pointer'>
+                  <Button bgspan='fore/20' click={() => setEditAccount(true)} type='button' title='edit' className='p-2 hover:bg-brown2 bg-brown3 text-fore1 rounded-full text-2xl md:p-3 md:text-3xl cursor-pointer'>
                     <RiEdit2Line />
                   </Button>
                 </div>

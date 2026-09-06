@@ -33,3 +33,24 @@ export const insertSort = <T>(arr: T[], item: T, compareFn: (a: T, b: T) => numb
 export const getFirstName = (name: string) => {
   return name.split(' ')[0].split('_')[0].split('.')[0];
 }
+
+export const formatTime = (time: number /** milliseconds */) => {
+  if (time < 0) return '';
+  time = Math.floor(time / 1000);
+  const hrs = Math.floor(time / (60 * 60));
+  const mins = Math.floor((time % (60 * 60)) / 60);
+  const secs = time % 60;
+
+  return `${hrs > 0 ? hrs < 10 ? '0' + `${hrs}h` : `${hrs}h` : ''} ${mins > 0 ? mins < 10 && hrs > 0 ? '0' + `${mins}m` : `${mins}m` : ''} ${secs >= 0 ? secs < 10 && mins > 0 ? '0' + `${secs}s` : `${secs}s` : ''}`;
+}
+
+export const getTime = (time: number /** milliseconds */, type: 'H' | 'M' | 'S') => {
+  switch (type) {
+    case 'H':
+      return Math.floor(time / 1000 * 60 * 60);
+    case 'M':
+      return Math.floor(time / 1000 * 60);
+    case 'S':
+      return Math.floor(time / 1000);
+  }
+}

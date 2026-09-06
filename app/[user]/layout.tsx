@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import useConfirmation from '@/_lib/context/confirmationContext';
 import Confirmation from '@/_components/confirmation';
 import { GameDetailsContextProvider } from '@/_lib/context/gameDetailsContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Page = ({ children }: {
   children: React.ReactNode
@@ -23,6 +24,7 @@ const Page = ({ children }: {
   const showInvitationCard = useShowInvitationCard();
   const confirmation = useConfirmation();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // sockets
   useEffect(() => {
@@ -36,11 +38,21 @@ const Page = ({ children }: {
     }
   }, [socket]);
 
+  // update invitations list
+  const updateInvitationsList = useCallback(() => {
+    // update the invitations list cache memory
+    queryClient.invalidateQueries({ queryKey: ['get_invitations'], refetchType: 'all'});
+  }, [queryClient])
+
   // register socket events
   useEffect(() => {
 
+
     // handlers
     function handleInvitationSend(data: InvitationAcceptDataType) {
+      // update invitation list
+      updateInvitationsList();
+
       // set notif
       notif?.setNotif({
         Node: () => {
@@ -58,7 +70,7 @@ const Page = ({ children }: {
               </div>
 
               <div className="absolute top-0 left-0 h-full w-full">
-                <Button className="w-full h-full" onClick={() => handleClick()} />
+                <Button className="w-full h-full" click={() => handleClick()} />
               </div>
             </>
           )
@@ -96,11 +108,20 @@ const Page = ({ children }: {
 
       confirmation?.setConfirmation(data);
     }
+
     function handleInvitationRejected(data: InvitationAcceptDataType) {
+      // update invite list
+      updateInvitationsList();
+
+      // also close the confirmation component if opened
+      handleCloseConfirm(data);
+
+      // set notification
       notif?.setNotif({
         message: `${getFirstName(data.toName)} rejected your invitation`
       })
     }
+
     function handleInvitationConfirmed(data: InvitationAcceptDataType) {
       // check if user exits in this socket
       if (!showInvitationCard?.showInvitationCard) {
@@ -125,12 +146,12 @@ const Page = ({ children }: {
 
       router.push(`/${data.toName.replaceAll(' ', '')}/play?${params.toString()}`);
     };
+
     function handleInvitationCanceled(data: InvitationAcceptDataType) {
       /// if user is waiting for confirm but player cancel
-      let fromName: string = 'Player';
+      let fromName: string = data.fromName;
       if (showInvitationCard?.showInvitationCard?.fromId === data.fromId) {
         showInvitationCard.setShowInvitationCard(null);
-        fromName = data.fromName;
       }
       
       // if user confirms and goes to /play but player canceled
@@ -147,6 +168,8 @@ const Page = ({ children }: {
         confirmation.setConfirmation(null);
       }
 
+      updateInvitationsList();
+
       notif?.setNotif({
         message: `${getFirstName(fromName)} canceled the invitation`,
       })
@@ -158,6 +181,15 @@ const Page = ({ children }: {
         confirmation.setConfirmation(null);
       }
     }
+
+    function handleInvitationBlocked(data: string) {
+      notif?.setNotif({
+        message: data
+      })
+    }
+
+    // invitation was blocked
+    socket.on('invitation:blocked', handleInvitationBlocked);
 
     // recieves an invitation
     socket.on('invitation:send', handleInvitationSend);
@@ -185,7 +217,7 @@ const Page = ({ children }: {
       socket.off('invitation:accept', handleInvitationAccepted);
       socket.off('invitation:send', handleInvitationSend);
     }
-  }, [socket, notif, showInvitationCard, confirmation, router])
+  }, [updateInvitationsList, socket, notif, showInvitationCard, confirmation, router])
 
   return (
     <UserDetailsProvider>

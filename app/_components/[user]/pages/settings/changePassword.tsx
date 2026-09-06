@@ -68,7 +68,7 @@ const ChangePassword = ({ close }: { close: () => void }) => {
           <h1 className='text-brown1'>Change your password</h1>
 
           {/** close */}
-          <Button bgspan='fore/20' onClick={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+          <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
             <IoClose className='text-fore2 text-xl' />
           </Button>
         </div>

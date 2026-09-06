@@ -109,6 +109,8 @@ export type Mode = 'Blitz' | 'Rapid' | 'Classic' | 'Bullet';
 
 export type Outcome = 'W' | 'L' | 'D';
 
+export type PieceColor = 'White' | 'Black' | 'Random';
+
 export type GameHistoryType = {
   players: ({
     player: {
@@ -222,7 +224,7 @@ export type InvitationSendType = {
   id: string;
   name: string
   data: {
-    pieceColor: 'White' | 'Black' | 'Random';
+    pieceColor: PieceColor
     mode: Mode;
     message: string;
     ex: number
@@ -233,7 +235,7 @@ export type InvitationNewDataType = {
   fromId: string;
   fromName: string
   data: {
-    pieceColor: 'White' | 'Black' | 'Random';
+    pieceColor: PieceColor
     mode: Mode;
     message: string;
     ex: number
@@ -242,7 +244,7 @@ export type InvitationNewDataType = {
 
 export type InvitationStateDataType = {
   fromId: string;
-  pieceColor: 'White' | 'Black' | 'Random';
+  pieceColor: PieceColor
   mode: Mode;
   message: string;
   ex: number
@@ -268,7 +270,7 @@ export type PlayerInfo = {
 export type InvitationAcceptDataType = InvitationNewDataType & {
   toName: string;
   toId: string;
-  toUserId?: string
+  sent?: boolean; // for the rendering the confirmation component in the invitation section found in more tab
 }
 
 export type ConfirmationContextType = {

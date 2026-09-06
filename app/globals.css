@@ -110,6 +110,10 @@ tbody tr:hover td {
   @apply relative min-h-0 min-w-0 cursor-pointer;
 }
 
+#div-button-feedback {
+  @apply relative min-h-0 min-w-0;
+}
+
 .feedback-span {
   border-radius: inherit;
   animation: scaleFeedback 0.15s ease-in-out;

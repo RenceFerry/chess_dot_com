@@ -78,7 +78,7 @@ const Page = () => {
       {/** top section */} 
       <div className='flex flex-row p-3 md:p-5 justify-between items-center w-full text-brown1'>
         {/** back */}
-        <Button bgspan='fore/20' type='button' onClick={handleBack} title='back' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+        <Button bgspan='fore/20' type='button' click={handleBack} title='back' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
           <IoArrowBackSharp className='text-2xl md:text-3xl' />
         </Button>
 
@@ -89,18 +89,6 @@ const Page = () => {
       </div>
 
       <main className='w-full flex-1 min-h-0 min-w-0 flex flex-col items-center p-5 gap-4'>
-
-        {/** account */}
-        <div className='w-full max-w-150 flex flex-col'>
-
-          {/** label */}
-          <h1 className='text-brown2 text-sm md:text-mds'>Account</h1>
-
-          {/** items */}
-          <Button onClick={() => setShowPasswordChange(true)} bgspan='fore/10' className='w-full flex flex-row justify-between items-center p-2 hover:bg-back3 text-fore1.s'>
-            <h1>Change Password</h1>
-          </Button>
-        </div>
 
         {/** preferences */}
         <form onChange={formChange} className='w-full max-w-150 flex flex-col'>
@@ -128,6 +116,18 @@ const Page = () => {
           </div>
 
         </form>
+
+        {/** account */}
+        <div className='w-full max-w-150 flex flex-col'>
+
+          {/** label */}
+          <h1 className='text-brown2 text-sm md:text-mds'>Account</h1>
+
+          {/** items */}
+          <Button click={() => setShowPasswordChange(true)} bgspan='fore/10' className='w-full flex flex-row justify-between items-center p-2 hover:bg-back3 text-fore1.s'>
+            <h1>Change Password</h1>
+          </Button>
+        </div>
       </main>
 
       { // change password card

@@ -29,7 +29,7 @@ const Notification = () => {
             <h1 className={`text-md text-${notif?.notif?.color || 'fore'} text-center`}>{notif?.notif?.message}</h1>
 
             {/** close button */}
-            <Button bgspan='fore/20' onClick={abortTimeOut} className='flex justify-center items-center ml-2 h-10 w-10 cursor-pointer hover:bg-back rounded-full hover:text-brown2' type='button' title='close'>
+            <Button bgspan='fore/20' click={abortTimeOut} className='flex justify-center items-center ml-2 h-10 w-10 cursor-pointer hover:bg-back rounded-full hover:text-brown2' type='button' title='close'>
               <IoClose className="text-error1 text-xl md:text-2xl" />
             </Button>
 
@@ -41,7 +41,7 @@ const Notification = () => {
             <notif.notif.Node />
 
             {/** close button */}
-            <Button bgspan='fore/20' onClick={abortTimeOut} className='flex justify-center items-center ml-2 h-10 w-10 cursor-pointer hover:bg-back rounded-full hover:text-brown2' type='button' title='close'>
+            <Button bgspan='fore/20' click={abortTimeOut} className='flex justify-center items-center ml-2 h-10 w-10 cursor-pointer hover:bg-back rounded-full hover:text-brown2' type='button' title='close'>
               <IoClose className="text-error1 text-xl md:text-2xl" />
             </Button>
           </div>

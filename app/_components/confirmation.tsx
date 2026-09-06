@@ -4,7 +4,7 @@ import useUserDet from '@/_lib/context/userDetailsContext';
 import { ConfirmationContextType } from '@/_lib/types';
 import Image from 'next/image';
 import { getFirstName } from '@/_utils/helpers';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPlayerInfo } from '@/_utils/serverActions/fetchActions';
 import { FaChessPawn } from 'react-icons/fa';
 import clsx from 'clsx';
@@ -12,12 +12,15 @@ import Button from './wrappers/button';
 import { useCallback } from 'react';
 import useSocket from '@/_lib/hooks/useSocket';
 import { usePathname, useRouter } from 'next/navigation';
+import { IoClose } from 'react-icons/io5';
 
+// sent parameter here is for rendering this component on the sent invitation section found in more tab
 const Confirmation = ({ confirmation }: { confirmation: ConfirmationContextType }) => {
   const userInfo = useUserDet();
   const socket = useSocket();
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // get image of opponent
   const { data, isPending } = useQuery({
@@ -68,17 +71,19 @@ const Confirmation = ({ confirmation }: { confirmation: ConfirmationContextType 
 
   // handle cancel
   const handleCancel = useCallback(() => {
+    // update invites list
+    queryClient.invalidateQueries({ queryKey: ['get_invitations'], refetchType: 'all' });
+
     socket.emit('invitation:cancel', {
       fromId: userInfo.id,
       toId: confirmation.confirmation?.toId,
       toName: confirmation.confirmation?.toName,
       fromName: userInfo.name,
       data: { ...confirmation.confirmation?.data },
-      toUserId: confirmation.confirmation?.toId,
     })
 
     close();
-  }, [close, userInfo, confirmation, socket]);
+  }, [close, userInfo, confirmation, socket, queryClient]);
 
   console.log('confirmation', confirmation.confirmation);
 
@@ -89,8 +94,27 @@ const Confirmation = ({ confirmation }: { confirmation: ConfirmationContextType 
       <div className='flex flex-col rounded-lg bg-back4 border-brown2 border min-w-64 w-9/10 md:w-[65%] max-w-150'>
 
         {/** confirmation */}
-        <div className='w-full flex flex-col p-3 center text-lg font-bold text-brown1 md:text-xl'>
-          {getFirstName(confirmation.confirmation?.toName || '' )} accepted you invitation
+        <div className='w-full flex flex-row p-3 justify-between text-lg font-bold text-brown1 md:text-xl'>
+
+          <div />
+
+          {/** title */
+            !confirmation.confirmation?.sent ?
+            <h1>
+              {getFirstName(confirmation.confirmation?.toName || '' )} accepted your invitation
+            </h1> :
+            <div />
+          }
+
+          {/** close button */
+            confirmation.confirmation?.sent ?
+              <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+                <IoClose className='text-fore2 text-xl' />
+              </Button> 
+            :
+              <div />
+          }
+
         </div>
 
         <div className='flex w-full flex-col min-w-0 items-center'>
@@ -166,21 +190,23 @@ const Confirmation = ({ confirmation }: { confirmation: ConfirmationContextType 
             <div className='h-10 w-3/4 min-w-20 px-3 text-back4 font-semibold flex flex-row gap-5 items-center justify-center' >
 
               {/** cancel */}
-              <Button className="h-full w-1/3 bg-error1 text-back4 hover:bg-error2 center rounded-lg" onClick={handleCancel}>
+              <Button className="h-full w-1/3 bg-error1 text-back4 hover:bg-error2 center rounded-lg" click={handleCancel}>
                 Cancel
               </Button>
 
-              {/** confirm */}
-              <Button className="h-full w-1/3 bg-green2 text-back4 hover:bg-green3 center rounded-lg" onClick={handleConfirm}>
-                Confirm
-              </Button>
+              {/** confirm */
+                !confirmation.confirmation?.sent && <Button className="h-full w-1/3 bg-green2 text-back4 hover:bg-green3 center rounded-lg" click={handleConfirm}>
+                  Confirm
+                </Button>
+              }
 
             </div>
 
           </div>
 
-          {/** note */}
-          <p className='px-10 py-3 text-fore2 text-xs md:text-sm text-center'>Waiting for {getFirstName(confirmation.confirmation?.fromName || '')} to confirm. Stay on this Page</p>
+          {/** note */
+            !confirmation.confirmation?.sent && <p className='px-10 py-3 text-fore2 text-xs md:text-sm text-center'>Waiting for {getFirstName(confirmation.confirmation?.fromName || '')} to confirm. Stay on this Page</p>
+          }
         </div>
       </div>
     

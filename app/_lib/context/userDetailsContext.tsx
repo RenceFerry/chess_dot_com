@@ -4,6 +4,7 @@ import { createContext, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { UserInfo } from '../types';
 import { getUserDet } from '@/_utils/serverActions/fetchActions';
+import Loading from '@/loading';
 
 const UserDetailsContext = createContext({} as UserInfo);
 
@@ -21,7 +22,7 @@ export const UserDetailsProvider = ({ children }: { children: React.ReactNode })
   })
 
   if (isPending) {
-    return <div>Loading...hahahha</div>;
+    return <Loading />;
   }
 
   if (isError || !userDet) {

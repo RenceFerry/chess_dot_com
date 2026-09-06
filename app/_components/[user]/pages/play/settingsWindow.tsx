@@ -65,7 +65,7 @@ const SettingsWindow = ({ close, settingsState, setSettingsState }: { close: (wi
           <h1 className='text-lg text-brown1'>Settings</h1>
 
           {/** close button */}
-          <Button bgspan='fore/20' onClick={() => close('settings')} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+          <Button bgspan='fore/20' click={() => close('settings')} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
             <IoClose className='text-fore2 text-xl' />
           </Button>
         </div>

@@ -10,6 +10,7 @@ import useSocket from '@/_lib/hooks/useSocket';
 import { useNotif } from '@/_lib/context/notifContext';
 import clsx from 'clsx';
 import { InvitationSendType } from '@/_lib/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 const InviteCard = ({ player }: { player: PlayerStatType }) => {
   const userInfo = useUserDet();
@@ -17,6 +18,7 @@ const InviteCard = ({ player }: { player: PlayerStatType }) => {
   const [ sendingInvitation, setSendingInvitation ] = useState<boolean>(false);
   const socket = useSocket();
   const notif = useNotif();
+  const queryClient = useQueryClient();
 
   // handle invitation
   const handleInvite = useCallback((formData: FormData) => {
@@ -28,6 +30,9 @@ const InviteCard = ({ player }: { player: PlayerStatType }) => {
 
   useEffect(() => {
     const handleInviteSent = (name: string) => {
+      //update list
+      queryClient.invalidateQueries({ queryKey: ['get_invitations', 'sent'] });
+
       setSendingInvitation(false);
       notif?.setNotif({
         message: 'Invitation sent to ' + name,
@@ -48,7 +53,7 @@ const InviteCard = ({ player }: { player: PlayerStatType }) => {
       socket.off('invitation:playing', handleInvitationPlaying);
       socket.off('invitation:sent', handleInviteSent);
     }
-  }, [socket, notif])
+  }, [socket, notif, queryClient])
 
   // handle input change
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {

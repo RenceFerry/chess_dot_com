@@ -169,7 +169,7 @@ const Page = () => {
       {/** top section */} 
       <div className='flex flex-row py-2 px-3 md:px-5 justify-between items-center w-full text-brown1'>
         {/** back */}
-        <Button bgspan='fore/20' type='button' onClick={handleBack} title='back' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+        <Button bgspan='fore/20' type='button' click={handleBack} title='back' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
           <IoArrowBackSharp className='text-2xl md:text-3xl' />
         </Button>
 
@@ -177,7 +177,7 @@ const Page = () => {
         <div className='flex flex-row font-bold'>
           
           {/** followed button switch to players followed */}
-          <Button bgspan='fore/20' onClick={() => setShowFollowers(false)} className={clsx('px-4 py-2', {
+          <Button bgspan='fore/20' click={() => setShowFollowers(false)} className={clsx('px-4 py-2', {
             'text-brown2 border-b-2 border-brown2 bg-brown5/10': !showFollowers,
             'text-fore1': showFollowers,
           })}>
@@ -185,7 +185,7 @@ const Page = () => {
           </Button>
 
           {/** followers button switch to followers */}
-          <Button bgspan='fore/20' onClick={() => setShowFollowers(true)} className={clsx('py-2 px-4', {
+          <Button bgspan='fore/20' click={() => setShowFollowers(true)} className={clsx('py-2 px-4', {
             'text-brown2 border-b-2 border-brown2 bg-brown5/10': showFollowers,
             'text-fore1': !showFollowers,
           })}>
@@ -240,7 +240,7 @@ const Page = () => {
             //<PlayersSkeleton />
           }
 
-          <div className='h-1 w-full bg-fore' ref={divObsRef} />
+          <div className='h-1 w-full' ref={divObsRef} />
         </div>
 
       </main>

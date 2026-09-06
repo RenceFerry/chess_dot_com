@@ -34,13 +34,13 @@ const More = () => {
               <h1 className='text-brown1/50 text-sm md:text-md px-3'>Personal</h1>
 
               {/** account details */}
-              <Button bgspan='fore/10' type='button' onClick={() => setAccountWindowHidden(false)} className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
+              <Button title='your account' bgspan='fore/10' type='button' click={() => setAccountWindowHidden(false)} className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
                 <CgDetailsMore className='text-2xl text-brown2' />
                 <h1>Account</h1>
               </Button>
 
               {/** followers */}
-              <Button bgspan='fore/10' className='cursor-pointer w-full h-10'>
+              <Button title='followers / following' bgspan='fore/10' className='cursor-pointer w-full h-10'>
                 <Link href={`${pathname}/followers`} className='w-full h-full flex px-2 items-center flex-row hover:bg-back2 gap-5'>
                   <GiShadowFollower className='text-2xl text-brown2' />
                   <h1>Followers / Following</h1>
@@ -55,19 +55,23 @@ const More = () => {
               <h1 className='text-sm md:text-md text-brown1/50 px-3'>Play</h1>
 
               {/** play bot */}
-              <Button bgspan='fore/10' className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
-                <FaRobot className='text-2xl text-brown2' />
-                <h1>Play Against Bot</h1>
+              <Button title='play against an AI' bgspan='fore/10' className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
+                <Link href={`${pathname}/play/robot`} className='w-full h-full flex items-center flex-row hover:bg-back2 gap-5'>
+                  <FaRobot className='text-2xl text-brown2' />
+                  <h1>Play Against Bot</h1>
+                </Link>
               </Button>
 
               {/** player against player */}
-              <Button bgspan='fore/10' className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
-                <MdPeopleAlt className='text-2xl text-brown2' />
-                <h1>Player Vs Player</h1>
+              <Button title='play offline with a friend' bgspan='fore/10' className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
+                <Link href={`${pathname}/play/player-vs-player`} className='w-full h-full flex items-center flex-row hover:bg-back2 gap-5'>
+                  <MdPeopleAlt className='text-2xl text-brown2' />
+                  <h1>Player Vs Player</h1>
+                </Link>
               </Button>
 
               {/** invitations */}
-              <Button bgspan='fore/10' onClick={() => setShowInvitations(true)} className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
+              <Button title='your invitations' bgspan='fore/10' click={() => setShowInvitations(true)} className='cursor-pointer w-full h-10 flex px-2 items-center flex-row hover:bg-back2 gap-5'>
                 <FaEnvelopeOpenText className='text-2xl text-brown2' />
                 <h1>Invitations</h1>
               </Button>
@@ -80,7 +84,7 @@ const More = () => {
               <h1 className='text-sm md:text-md text-brown1/50 px-3'>Settings</h1>
 
               {/** settings */}
-              <Button bgspan='fore/10' className='cursor-pointer w-full h-10'>
+              <Button title='settings' bgspan='fore/10' className='cursor-pointer w-full h-10'>
                 <Link href={`${pathname}/settings`} className='flex px-2 items-center flex-row hover:bg-back2 gap-5 w-full h-full'>
                   <MdOutlineSettings className='text-2xl text-brown2' />
                   <h1>Settings</h1>

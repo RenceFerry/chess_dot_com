@@ -13,7 +13,7 @@ export const ProfileCardSkeleton = ({ close }: { close: () => void }) => {
         {/** title & close button */}
         <div className='w-full flex flex-row p-3 justify-end'>
           {/** close button */}
-          <Button bgspan='fore/20' onClick={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+          <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
             <IoClose className='text-fore2 text-xl' />
           </Button>
         </div>
@@ -167,7 +167,7 @@ export const ChangePasswordSkeleton = ({ close }: {close: () => void}) => {
           <h1 className='text-brown1'>Change your password</h1>
 
           {/** close */}
-          <Button bgspan='fore/20' onClick={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+          <Button bgspan='fore/20' click={close} title='close' type='button' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
             <IoClose className='text-fore2 text-xl' />
           </Button>
         </div>
@@ -191,5 +191,36 @@ export const ChangePasswordSkeleton = ({ close }: {close: () => void}) => {
         </div>
       </div>
     </div>
+  )
+}
+
+export const InvitationSkeleton = () => {
+  return (
+    <>
+      {
+        Array.from({ length: 10 }).map((_, i) => (
+          <div key={i} className='w-95/100 max-w-200 h-16 bg-back2 rounded-lg gap-2 hover:bg-back hover:scale-102 duration-75 transition-all ease-in-out items-center flex justify-between px-3 cursor-pointer animate-pulse'>
+
+            {/** to name */}
+            <div className='w-30 h-8 rounded-lg bg-back'/>
+
+            {/** mode and expirtation */}
+            <div className="flex-col center gap-1">
+
+              {/** mode */}
+              <div className='w-20 h-4 rounded-full bg-back'/>
+
+              {/** expiraton */}
+              <div className='w-20 h-4 rounded-full bg-back'/>
+
+            </div>
+
+            {/** cancel */}
+            <div className='w-18 h-8 rounded-lg bg-back'/>
+
+          </div>
+        ))
+      }
+    </>
   )
 }

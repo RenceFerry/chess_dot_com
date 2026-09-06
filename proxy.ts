@@ -37,7 +37,7 @@ export default async function proxy(req: NextRequest)
 
   const name = decrypted?.name ? (decrypted.name as string).replaceAll(' ', ''): '';
  
-  console.log('test',wholePath, privateRoutes.test(wholePath), urlUser);
+  console.log('test',wholePath, privateRoutes.test(wholePath), urlUser, path);
 
   // partial routes
   if (partialRoutes.includes(path)) 
@@ -52,15 +52,7 @@ export default async function proxy(req: NextRequest)
   }
 
   // private routes
-  if (
-    privateRoutes.test(wholePath) //||
-    //test /user && /user/
-    // ( decrypted &&
-    // urlUser.toLowerCase() === name.toLowerCase() &&
-    // (path.split('/').length === 2 ||
-    // (path.split('/').length === 3 && path.split('/')[2] === ''
-    // )))
-  )
+  if (privateRoutes.test(wholePath))
   {
     console.log('hello private')
     if (!decrypted)
@@ -75,7 +67,7 @@ export default async function proxy(req: NextRequest)
 
     if (urlUser.toLowerCase() !== name.toLowerCase())
     {
-      return NextResponse.redirect(new URL(`/notFound?url=${req.url}`, req.url));
+      return NextResponse.rewrite(new URL('/404', req.url));
       // if (!(path.split('/')[2] === undefined || path.split('/')[2] === '')) {
       //   return NextResponse.redirect(new URL(`/${name}/${path.split('/')[2]}`, req.nextUrl));
       // }
@@ -83,19 +75,16 @@ export default async function proxy(req: NextRequest)
     }
 
     return NextResponse.next();
-  } 
+  }
 
   // public routes
-  if (publicRoutes.includes(path)) {
-    console.log("hello public")
-    return NextResponse.next();
-  }
-
-  if (path !== '/notFound') {
-    return NextResponse.redirect(new URL(`/notFound?url=${req.url}`, req.url));
-  }
-
+  // if (publicRoutes.includes(path)) {
+  //   console.log("hello public")
+  //   return NextResponse.next();
+  // }
   return NextResponse.next();
+
+  //return NextResponse.rewrite(new URL('/404', req.url));
 }
 
 export const config = {

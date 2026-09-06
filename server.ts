@@ -32,7 +32,7 @@ app.prepare().then(async () => {
   // const streamsInfos = new Map<string, StreamCardsInfoType>();
   // const streamsKeys = new Array<string>();
   // for invitations
-  const invitations = new Map<string, InvitationStateType>();
+  // const invitations = new Map<string, InvitationStateType>();
 
   // temporarily populate streams data
   // streams.forEach((stream) => {
@@ -51,24 +51,24 @@ app.prepare().then(async () => {
   // })
 
   // temporarily populate redis streams
-  try {
-    streams.forEach(async (stream) => {
-      const key = stream.p1 < stream.p2 ? stream.p1 + '::' + stream.p2 + '::' + stream.no : stream.p2 + '::' + stream.p1 + '::' + stream.no ;
-      await redis.json.set('streams', `$["${key}"]`, {
-        no: stream.no,
-        p1Elo: stream.p1Elo,
-        p2Elo: stream.p2Elo,
-        p1Name: stream.p1,
-        p2Name: stream.p2,
-        mode: 'Blitz',
-        p1Img: null,
-        p2Img: null
-      })
-      await redis.zAdd('streams::keys', { score: Date.now() + 1000 * 60 * 60 * 24, value: key})
-    }) 
-  } catch (e) {
-    console.error(e);
-  }
+  // try {
+  //   streams.forEach(async (stream) => {
+  //     const key = stream.p1 < stream.p2 ? stream.p1 + '::' + stream.p2 + '::' + stream.no : stream.p2 + '::' + stream.p1 + '::' + stream.no ;
+  //     await redis.json.set('streams', `$["${key}"]`, {
+  //       no: stream.no,
+  //       p1Elo: stream.p1Elo,
+  //       p2Elo: stream.p2Elo,
+  //       p1Name: stream.p1,
+  //       p2Name: stream.p2,
+  //       mode: 'Blitz',
+  //       p1Img: null,
+  //       p2Img: null
+  //     })
+  //     await redis.zAdd('streams::keys', { score: Date.now() + 1000 * 60 * 60 * 24, value: key})
+  //   }) 
+  // } catch (e) {
+  //   console.error(e);
+  // }
 
   // initialize socket.io server
   const io = new Server(server, {
@@ -161,7 +161,7 @@ app.prepare().then(async () => {
   global.userStatus = userStatus;
   // global.streamsInfos = streamsInfos;
   // global.streamsKeys = streamsKeys;
-  global.invitations = invitations;
+  // global.invitations = invitations;
 
   // for deleting stale temp data
   // const int = setInterval(() => {

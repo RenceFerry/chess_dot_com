@@ -1,7 +1,7 @@
-import { insertSort } from './../helpers';
+
 import { Socket } from 'socket.io';
 
-import { InvitationAcceptDataType, InvitationSendType, InvitationStateType, PlayersMapObjectType } from "@/_lib/types";
+import { InvitationAcceptDataType, InvitationSendType, PlayersMapObjectType } from "@/_lib/types";
 import redis from '@/_lib/redis';
 
 export const handleHelloEvent = (data: string) => {
@@ -50,33 +50,75 @@ export const handleInvitationSend = async (data: InvitationSendType, socket: Soc
   //   })
   // }
 
-  // store invitation in redis
-  try {
+  const fiveMinAgo = Date.now() - 1000 * 60 * 5;
+  try 
+  {
+    // if user or reciever has 100 invitations or block invitation
+    const sent = await redis.zCount(`invitation::sent::keys::${userId}`, `(${fiveMinAgo}`, '+inf');
+    //const toUserRecieved = 400;
+    const toUserRecieved = await redis.zCount(`invitation::received::keys::${data.id}`, `(${fiveMinAgo}`, '+inf');
+
+    if (sent > 100) 
+    {
+      return socket.emit('invitation:blocked', 'Maximum number of sent invitations was reached (100)')
+    } 
+    else if (toUserRecieved > 100)
+    { 
+      return socket.emit('invitation:blocked', data.name + ' has reached maximum number of received invitations.')
+    }
+    
+    // store invitation in redis
     // for sent invitations
-    await redis.hSet(`invitation::sent::${userId}`, {
-      [data.name]: JSON.stringify(data.data)
-    });
-    await redis.hExpire(`invitation::sent::${userId}`, data.name, 60 * 5);
-    await redis.zAdd(`invitation::sent::keys::${userId}`,{
+    const pipeline = redis.multi();
+    pipeline.hSetEx(`invitation::sent::${userId}`, {
+      [data.name]: JSON.stringify({
+        fromName: userName,
+        fromId: userId,
+        toName: data.name,
+        toId: data.id,
+        ...data.data
+      })
+    }, {
+      expiration: { type: 'EX', value: 60 * 5}
+    })
+    // store keys sent
+    .zAdd(`invitation::sent::keys::${userId}`,{
       score: Date.now() + 1000 * 60 * 5,
       value: data.name,
-    });
-    
+    })
+    // set new expiration 
+    .expire(`invitation::sent::keys::${userId}`, 60 * 5)
     // for received invitations
-    await redis.hSet(`invitation::recieved::${data.id}`, {
-      [data.name]: JSON.stringify(data.data)
-    });
-    await redis.hExpire(`invitation::recieved::${data.id}`, userName, 60 * 5);
-    await redis.zAdd(`invitation::recieved::keys::${data.id}`,{
+    .hSetEx(`invitation::received::${data.id}`, {
+      [userName]: JSON.stringify({
+        fromName: userName,
+        fromId: userId,
+        toName: data.name,
+        toId: data.id,
+        ...data.data
+      })
+    }, {
+      expiration: { type: 'EX', value: 60 * 5}
+    })
+    // store received keys
+    .zAdd(`invitation::received::keys::${data.id}`,{
       score: Date.now() + 1000 * 60 * 5,
       value: userName,
-    }); 
-  } catch (e) {
+    })
+    // set new expiration 
+    .expire(`invitation::received::keys::${data.id}`, 60 * 5)
+
+    // execute redis 
+    await pipeline.exec();
+  } 
+  catch (e) 
+  {
     console.log('server error')
   }
 
   // send invitation if online
-  if (user) {
+  if (user) 
+  {
     for (const [key] of user.socket) {
       socket.to(key).emit('invitation:send', { 
         fromId: socket.data.user.userId, 
@@ -152,7 +194,7 @@ export const handleInvitationCancel = (data: InvitationAcceptDataType, socket: S
 
   // get userStatus
   const usersStatus = global.userStatus;
-  const user: PlayersMapObjectType | undefined | null = usersStatus?.get(data.toUserId || data.toId) || null;
+  const user: PlayersMapObjectType | undefined | null = usersStatus?.get(data.toId) || null;
   const me: PlayersMapObjectType | undefined | null = userStatus?.get(socket.data.user.userId);
 
   // delete invitation in temp storage
@@ -190,23 +232,21 @@ export const handleRoomHello = (room: string, socket: Socket) => {
 
 // helper fns
 async function deleteInvitationAndKeys(fromId: string, fromName: string, toId: string, toName: string) {
-  // const invitations = global.invitations;
-
-  // const userInvitation: InvitationStateType | null = invitations?.get(toId) || null;
-
-  // if (userInvitation) {
-  //   console.log('b d',userInvitation.map);
-  //   userInvitation.map.delete(fromName);
-  //   userInvitation.keys = userInvitation.keys.filter(k => k !== fromName);
-  //   console.log('a d', userInvitation.map);
-  // }
 
   try {
-    await redis.hDel(`invitation::sent::${fromId}`, toName);
-    await redis.hDel(`invitation::recieved::${toId}`, fromName);
+    // redis pipeline
+    const pipeline = redis.multi();
+    // delete hash sent
+    pipeline.hDel(`invitation::sent::${fromId}`, toName)
+    // delete received hash
+    .hDel(`invitation::received::${toId}`, fromName)
+    // delete received keys
+    .zRem(`invitation::received::keys::${toId}`, fromName)
+    // delete sent keys
+    .zRem(`invitation::sent::keys::${fromId}`, toName);
 
-    await redis.zRem(`invitation::recieved::keys::${toId}`, fromName);
-    await redis.zRem(`invitation::sent::keys::${fromId}`, toName);
+    // run pipline
+    await pipeline.exec();
   } catch (e) {
     console.log('server error');
   }

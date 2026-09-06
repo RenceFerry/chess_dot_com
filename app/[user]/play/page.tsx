@@ -112,7 +112,7 @@ const Page = () => {
       {/** top section */} 
       <div className='flex flex-row p-3 md:p-5 justify-between items-center w-full text-brown1'>
         {/** back */}
-        <Button bgspan='fore/20' type='button' onClick={handleBack} title='back' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+        <Button bgspan='fore/20' type='button' click={handleBack} title='back' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
           <IoArrowBackSharp className='text-2xl md:text-3xl' />
         </Button>
 
@@ -120,7 +120,7 @@ const Page = () => {
         <h1 className='text-xl font-bold'>Online Game</h1>
         
         {/** settings */}
-        <Button bgspan='fore/20' type='button' onClick={() => toggleHidden('settings')} title='settings' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
+        <Button bgspan='fore/20' type='button' click={() => toggleHidden('settings')} title='settings' className='p-2 rounded-full hover:bg-back2 cursor-pointer'>
           <BiSlider className='text-2xl md:text-3xl' />
         </Button>
       </div>
@@ -142,12 +142,12 @@ const Page = () => {
             <div className={clsx('flex flex-row bg-back1 rounded-t-2xl items-center justify-center gap-2 p-2 md:p-5 mt-3 z-10')}>
 
               {/** toggle chat window */}
-              <Button bgspan='fore/20' onClick={() => toggleHidden('chats')} title='toggle chat window' type='button' className='rounded-full w-12 h-12 hover:bg-back cursor-pointer'>
+              <Button bgspan='fore/20' click={() => toggleHidden('chats')} title='toggle chat window' type='button' className='rounded-full w-12 h-12 hover:bg-back cursor-pointer'>
                 <IoChatbubbleEllipsesSharp className='text-brown1 text-3xl m-auto' />
               </Button>
 
               {/** toggle moves list */}
-              <Button bgspan='fore/20' onClick={() => toggleHidden('moves')} title='toggle moves list' type='button' className='rounded-full w-12 h-12 hover:bg-back cursor-pointer'>
+              <Button bgspan='fore/20' click={() => toggleHidden('moves')} title='toggle moves list' type='button' className='rounded-full w-12 h-12 hover:bg-back cursor-pointer'>
                 <FaTableList className='text-brown1 text-2xl m-auto' />
               </Button>
 

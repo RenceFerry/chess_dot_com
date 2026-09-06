@@ -17,6 +17,7 @@ const GameHistory = () => {
       if (error) throw new Error(error);
       return data;
     },
+    staleTime: 1000 * 60 * 60
   });
   //const history = undefined, isError = false, isLoading = true;
 

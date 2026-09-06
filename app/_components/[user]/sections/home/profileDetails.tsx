@@ -22,8 +22,8 @@ const ProfileDetails = () => {
       }
       return data;
     },
-    staleTime: 1000 * 60,
-    retry: false
+    staleTime: 1000 * 60 * 60,
+    retry: 3
   });
 
   if (isPending) {

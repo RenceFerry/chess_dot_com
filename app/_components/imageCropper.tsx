@@ -420,12 +420,12 @@ const ImageCropper = ({ imgSrc, setImgSrc, setProccessing, file }: {
       <div className="absolute top-0 left-0 w-full flex z-30 flex-row justify-between p-5">
           
         {/** save */}
-        <Button bgspan="fore/10" onClick={save} title="save" className="rounded-full p-2 hover:bg-back3">
+        <Button bgspan="fore/10" click={save} title="save" className="rounded-full p-2 hover:bg-back3">
           <FaCheck className="text-fore2 text-3xl" />
         </Button>
 
         {/** cancel */}
-        <Button bgspan="fore/10" onClick={() => setImgSrc(null)} title="cancel"  className="rounded-full p-2 hover:bg-back3">
+        <Button bgspan="fore/10" click={() => setImgSrc(null)} title="cancel"  className="rounded-full p-2 hover:bg-back3">
           <IoClose className="text-fore2 text-3xl" />
         </Button>
       </div>
